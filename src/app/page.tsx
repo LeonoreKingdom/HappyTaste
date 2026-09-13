@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 import { MenuCard } from "@/components/menu/menu-card";
 
 const menuCategories = ["Makanan Utama", "Camilan", "Minuman"] as const;
@@ -60,6 +64,18 @@ const mockMenus = [
 ];
 
 export default function Home() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const normalizedQuery = searchQuery.trim().toLocaleLowerCase("id-ID");
+  const filteredMenus = mockMenus.filter((menu) => {
+    if (!normalizedQuery) {
+      return true;
+    }
+
+    return [menu.name, menu.description, menu.category].some((value) =>
+      value.toLocaleLowerCase("id-ID").includes(normalizedQuery),
+    );
+  });
+
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
       <header className="mb-10 flex flex-col gap-5 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
@@ -84,33 +100,60 @@ export default function Home() {
         <h2 id="menu-title" className="sr-only">
           Daftar menu HappyTaste
         </h2>
-        <div className="space-y-12">
-          {menuCategories.map((category) => {
-            const menusInCategory = mockMenus.filter(
-              (menu) => menu.category === category,
-            );
-
-            return (
-              <section key={category} aria-labelledby={`category-${category}`}>
-                <h3
-                  id={`category-${category}`}
-                  className="mb-5 text-2xl font-bold text-stone-900"
-                >
-                  {category}
-                </h3>
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {menusInCategory.map((menu, index) => (
-                    <MenuCard
-                      key={menu.id}
-                      menu={menu}
-                      prioritizeImage={index < 3}
-                    />
-                  ))}
-                </div>
-              </section>
-            );
-          })}
+        <div className="mb-10 max-w-xl">
+          <label
+            htmlFor="menu-search"
+            className="mb-2 block text-sm font-semibold text-stone-800"
+          >
+            Cari menu
+          </label>
+          <input
+            id="menu-search"
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Contoh: nasi goreng atau kopi"
+            className="w-full rounded-2xl border border-orange-200 bg-white px-4 py-3 text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+          />
         </div>
+
+        {filteredMenus.length === 0 ? (
+          <p className="rounded-2xl border border-dashed border-orange-200 bg-white px-5 py-8 text-center text-stone-600">
+            Menu tidak ditemukan. Coba gunakan kata kunci lain.
+          </p>
+        ) : (
+          <div className="space-y-12">
+            {menuCategories.map((category) => {
+              const menusInCategory = filteredMenus.filter(
+                (menu) => menu.category === category,
+              );
+
+              if (menusInCategory.length === 0) {
+                return null;
+              }
+
+              return (
+                <section key={category} aria-labelledby={`category-${category}`}>
+                  <h3
+                    id={`category-${category}`}
+                    className="mb-5 text-2xl font-bold text-stone-900"
+                  >
+                    {category}
+                  </h3>
+                  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    {menusInCategory.map((menu, index) => (
+                      <MenuCard
+                        key={menu.id}
+                        menu={menu}
+                        prioritizeImage={index < 3}
+                      />
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        )}
       </section>
     </main>
   );
