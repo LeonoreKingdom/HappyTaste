@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { mockBanners, mockPromos } from "@/data/mock-promos";
 import { PromoCarousel } from "@/components/promo/promo-carousel";
+import { PromoPopupDialog } from "@/components/promo/promo-popup-dialog";
 import { Utensils, Calendar, MapPin, Sparkles, Tag, Gift, Award } from "lucide-react";
 
 export default function HomePage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-12">
+      {/* Pop Up Promo Modal - Once Per Session */}
+      <PromoPopupDialog promo={mockPromos[0]} />
+
       {/* Hero Promo Banner Carousel Section */}
       <section aria-label="Banner Promo Bergilir">
         <PromoCarousel banners={mockBanners} promos={mockPromos} />
