@@ -31,6 +31,10 @@ yarn-error.log*
 # ngodingpakeai
 .ngodingpakeai/pending.json
 .ngodingpakeai/summaries.json
+# sqlite / database
+*.db
+*.db-journal
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
