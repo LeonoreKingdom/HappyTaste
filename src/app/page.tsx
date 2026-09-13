@@ -5,6 +5,7 @@ import { useState } from "react";
 import { MenuCard } from "@/components/menu/menu-card";
 
 const menuCategories = ["Makanan Utama", "Camilan", "Minuman"] as const;
+const categoryFilters = ["Semua", ...menuCategories] as const;
 
 const mockMenus = [
   {
@@ -65,15 +66,20 @@ const mockMenus = [
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<
+    (typeof menuCategories)[number] | "Semua"
+  >("Semua");
   const normalizedQuery = searchQuery.trim().toLocaleLowerCase("id-ID");
   const filteredMenus = mockMenus.filter((menu) => {
-    if (!normalizedQuery) {
-      return true;
-    }
+    const matchesSearch =
+      !normalizedQuery ||
+      [menu.name, menu.description, menu.category].some((value) =>
+        value.toLocaleLowerCase("id-ID").includes(normalizedQuery),
+      );
+    const matchesCategory =
+      selectedCategory === "Semua" || menu.category === selectedCategory;
 
-    return [menu.name, menu.description, menu.category].some((value) =>
-      value.toLocaleLowerCase("id-ID").includes(normalizedQuery),
-    );
+    return matchesSearch && matchesCategory;
   });
 
   return (
@@ -115,6 +121,28 @@ export default function Home() {
             placeholder="Contoh: nasi goreng atau kopi"
             className="w-full rounded-2xl border border-orange-200 bg-white px-4 py-3 text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
           />
+        </div>
+
+        <div className="mb-10 flex flex-wrap gap-2" aria-label="Filter kategori menu">
+          {categoryFilters.map((category) => {
+            const isSelected = selectedCategory === category;
+
+            return (
+              <button
+                key={category}
+                type="button"
+                onClick={() => setSelectedCategory(category)}
+                aria-pressed={isSelected}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  isSelected
+                    ? "bg-orange-600 text-white"
+                    : "bg-orange-100 text-orange-800 hover:bg-orange-200"
+                }`}
+              >
+                {category}
+              </button>
+            );
+          })}
         </div>
 
         {filteredMenus.length === 0 ? (
