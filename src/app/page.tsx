@@ -1,17 +1,14 @@
 import Link from "next/link";
 import { mockBanners, mockPromos } from "@/data/mock-promos";
-import { PromoBannerCard } from "@/components/promo/promo-banner-card";
+import { PromoCarousel } from "@/components/promo/promo-carousel";
 import { Utensils, Calendar, MapPin, Sparkles, Tag, Gift, Award } from "lucide-react";
 
 export default function HomePage() {
-  const activeBanner = mockBanners[0];
-  const activePromo = mockPromos.find((p) => p.id === activeBanner.promoId);
-
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-12">
-      {/* Hero Promo Banner Section */}
-      <section aria-label="Banner Promo Utama">
-        <PromoBannerCard banner={activeBanner} promo={activePromo} />
+      {/* Hero Promo Banner Carousel Section */}
+      <section aria-label="Banner Promo Bergilir">
+        <PromoCarousel banners={mockBanners} promos={mockPromos} />
       </section>
 
       {/* Quick Access Actions */}
