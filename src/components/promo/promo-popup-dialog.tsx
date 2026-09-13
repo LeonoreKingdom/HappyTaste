@@ -63,29 +63,40 @@ export function PromoPopupDialog({
         </button>
 
         {/* Promo Image Header */}
-        <div className="relative h-48 w-full overflow-hidden bg-orange-600">
+        <Link
+          href={`/promo/${promo.id}`}
+          onClick={handleClose}
+          className="block relative h-48 w-full overflow-hidden bg-orange-600 group cursor-pointer"
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={promo.bannerUrl}
             alt={promo.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-orange-600 text-white text-xs font-bold flex items-center gap-1 shadow">
             <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
             <span>Spesial Hari Ini!</span>
           </div>
-        </div>
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+        </Link>
 
         {/* Modal Body */}
         <div className="p-6 space-y-4">
           <div className="space-y-1.5">
-            <h2
-              id="promo-popup-title"
-              className="text-xl font-bold text-gray-900 leading-snug"
+            <Link
+              href={`/promo/${promo.id}`}
+              onClick={handleClose}
+              className="block group"
             >
-              {promo.title}
-            </h2>
+              <h2
+                id="promo-popup-title"
+                className="text-xl font-bold text-gray-900 leading-snug group-hover:text-orange-600 transition-colors"
+              >
+                {promo.title}
+              </h2>
+            </Link>
             <p className="text-sm text-gray-600 leading-relaxed">
               {promo.description}
             </p>
