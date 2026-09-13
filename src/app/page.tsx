@@ -1,11 +1,14 @@
 import { MenuCard } from "@/components/menu/menu-card";
 
+const menuCategories = ["Makanan Utama", "Camilan", "Minuman"] as const;
+
 const mockMenus = [
   {
     id: "nasi-goreng-rempah",
     name: "Nasi Goreng Rempah",
     description: "Nasi goreng wangi dengan ayam suwir, telur, dan acar segar.",
     price: 42000,
+    category: "Makanan Utama",
     image:
       "https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=900&q=80",
   },
@@ -14,6 +17,7 @@ const mockMenus = [
     name: "Ayam Bakar Madu",
     description: "Ayam panggang berbumbu madu dengan sambal dan lalapan.",
     price: 48000,
+    category: "Makanan Utama",
     image:
       "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=900&q=80",
   },
@@ -22,6 +26,7 @@ const mockMenus = [
     name: "Happy Beef Burger",
     description: "Patty sapi juicy, keju leleh, selada renyah, dan kentang goreng.",
     price: 52000,
+    category: "Camilan",
     image:
       "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80",
   },
@@ -30,6 +35,7 @@ const mockMenus = [
     name: "Spaghetti Bolognese",
     description: "Pasta al dente dengan saus tomat daging yang kaya rasa.",
     price: 47000,
+    category: "Makanan Utama",
     image:
       "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=900&q=80",
   },
@@ -38,6 +44,7 @@ const mockMenus = [
     name: "Caesar Salad",
     description: "Selada segar, ayam panggang, crouton, dan dressing creamy.",
     price: 39000,
+    category: "Camilan",
     image:
       "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80",
   },
@@ -46,6 +53,7 @@ const mockMenus = [
     name: "Es Kopi Susu Gula Aren",
     description: "Kopi espresso, susu segar, dan manis gula aren yang lembut.",
     price: 26000,
+    category: "Minuman",
     image:
       "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=900&q=80",
   },
@@ -76,14 +84,32 @@ export default function Home() {
         <h2 id="menu-title" className="sr-only">
           Daftar menu HappyTaste
         </h2>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {mockMenus.map((menu, index) => (
-            <MenuCard
-              key={menu.id}
-              menu={menu}
-              prioritizeImage={index < 3}
-            />
-          ))}
+        <div className="space-y-12">
+          {menuCategories.map((category) => {
+            const menusInCategory = mockMenus.filter(
+              (menu) => menu.category === category,
+            );
+
+            return (
+              <section key={category} aria-labelledby={`category-${category}`}>
+                <h3
+                  id={`category-${category}`}
+                  className="mb-5 text-2xl font-bold text-stone-900"
+                >
+                  {category}
+                </h3>
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {menusInCategory.map((menu, index) => (
+                    <MenuCard
+                      key={menu.id}
+                      menu={menu}
+                      prioritizeImage={index < 3}
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </div>
       </section>
     </main>
