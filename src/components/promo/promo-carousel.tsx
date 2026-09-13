@@ -88,6 +88,8 @@ export function PromoCarousel({
         {banners.map((banner, index) => {
           const promo = promos.find((p) => p.id === banner.promoId);
 
+          const detailHref = banner.link || (banner.promoId ? `/promo/${banner.promoId}` : "#");
+
           return (
             <div
               key={banner.id}
@@ -99,9 +101,11 @@ export function PromoCarousel({
                   <span>Promo Spesial #{index + 1}</span>
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
-                  {banner.title}
-                </h1>
+                <Link href={detailHref} className="block group">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight group-hover:text-orange-100 transition-colors">
+                    {banner.title}
+                  </h1>
+                </Link>
 
                 <p className="text-orange-100 text-sm sm:text-base leading-relaxed line-clamp-3">
                   {promo?.description ||
@@ -110,7 +114,7 @@ export function PromoCarousel({
 
                 <div className="pt-2 flex flex-wrap items-center gap-3">
                   <Link
-                    href={banner.link}
+                    href={detailHref}
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-orange-600 hover:bg-orange-50 font-semibold text-sm shadow-md transition-all transform active:scale-95"
                   >
                     <Tag className="w-4 h-4" />
@@ -120,18 +124,22 @@ export function PromoCarousel({
                 </div>
               </div>
 
-              <div className="relative aspect-[16/9] md:aspect-[4/3] rounded-xl overflow-hidden shadow-2xl border border-white/20 bg-orange-700/50">
+              <Link
+                href={detailHref}
+                className="relative aspect-[16/9] md:aspect-[4/3] rounded-xl overflow-hidden shadow-2xl border border-white/20 bg-orange-700/50 block group cursor-pointer"
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={banner.imageUrl}
                   alt={banner.title}
-                  className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                   draggable={false}
                 />
                 <div className="absolute top-3 right-3 px-2.5 py-1 rounded-md bg-black/60 backdrop-blur text-white text-xs font-medium">
                   HappyTaste Resto
                 </div>
-              </div>
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+              </Link>
             </div>
           );
         })}
