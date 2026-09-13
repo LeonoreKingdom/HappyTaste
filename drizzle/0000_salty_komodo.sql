@@ -6,7 +6,7 @@ CREATE TABLE `banners` (
 	`sort_order` integer DEFAULT 0 NOT NULL,
 	`is_active` integer DEFAULT true NOT NULL,
 	`promo_id` text,
-	`created_at` integer NOT NULL,
+	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	FOREIGN KEY (`promo_id`) REFERENCES `promos`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
@@ -20,5 +20,5 @@ CREATE TABLE `promos` (
 	`start_date` integer NOT NULL,
 	`end_date` integer NOT NULL,
 	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` integer NOT NULL
+	`created_at` integer DEFAULT (unixepoch()) NOT NULL
 );

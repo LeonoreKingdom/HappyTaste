@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "796ac38e-86c5-47b3-80d5-7ad6ab90a806",
+  "id": "6d3f8f76-9499-4f2f-918c-8cde3905808f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "banners": {
@@ -63,7 +63,8 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "(unixepoch())"
         }
       },
       "indexes": {},
@@ -159,7 +160,8 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "(unixepoch())"
         }
       },
       "indexes": {},

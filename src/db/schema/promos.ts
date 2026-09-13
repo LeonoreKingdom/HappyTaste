@@ -1,5 +1,5 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 export const promos = sqliteTable("promos", {
   id: text("id").primaryKey(),
@@ -13,7 +13,7 @@ export const promos = sqliteTable("promos", {
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
-    .$defaultFn(() => new Date()),
+    .default(sql`(unixepoch())`),
 });
 
 export const banners = sqliteTable("banners", {
@@ -26,7 +26,7 @@ export const banners = sqliteTable("banners", {
   promoId: text("promo_id").references(() => promos.id, { onDelete: "set null" }),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
-    .$defaultFn(() => new Date()),
+    .default(sql`(unixepoch())`),
 });
 
 export const promosRelations = relations(promos, ({ many }) => ({
