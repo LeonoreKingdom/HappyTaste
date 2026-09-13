@@ -8,6 +8,13 @@
       "when": 1789328950985,
       "tag": "0000_salty_komodo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1789331669662,
+      "tag": "0001_peaceful_baron_strucker",
+      "breakpoints": true
     }
   ]
 }
