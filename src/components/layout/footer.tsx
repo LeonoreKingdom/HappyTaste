@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Utensils, Heart } from "lucide-react";
+import { Utensils } from "lucide-react";
 
 export function Footer() {
   return (
