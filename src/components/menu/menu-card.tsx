@@ -1,6 +1,8 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export type MenuCardItem = {
+  id: string;
   name: string;
   description: string;
   price: number;
@@ -20,7 +22,11 @@ const rupiah = new Intl.NumberFormat("id-ID", {
 
 export function MenuCard({ menu, prioritizeImage = false }: MenuCardProps) {
   return (
-    <article className="overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-sm transition-shadow hover:shadow-md">
+    <Link
+      href={`/menu/${menu.id}`}
+      className="block rounded-3xl outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+    >
+      <article className="overflow-hidden rounded-3xl border border-orange-100 bg-white shadow-sm transition-shadow hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden bg-orange-50">
         <Image
           src={menu.image}
@@ -40,6 +46,7 @@ export function MenuCard({ menu, prioritizeImage = false }: MenuCardProps) {
           {rupiah.format(menu.price)}
         </p>
       </div>
-    </article>
+      </article>
+    </Link>
   );
 }
