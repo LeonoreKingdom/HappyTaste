@@ -1,5 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
-import { mockPromos } from "@/data/mock-promos";
+import { activePromos, getPromoBadgeLabel } from "@/data/mock-promos";
 import { Tag, Calendar, Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
 
 export const metadata = {
@@ -9,7 +10,7 @@ export const metadata = {
 
 export default function PromoListPage() {
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
       {/* Header Banner */}
       <div className="rounded-2xl bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 p-8 text-white shadow-lg space-y-3">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-xs font-semibold uppercase tracking-wider">
@@ -27,7 +28,7 @@ export default function PromoListPage() {
 
       {/* Promos Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mockPromos.map((promo) => {
+        {activePromos.map((promo) => {
           const endDateFormatted = new Date(promo.endDate).toLocaleDateString(
             "id-ID",
             { day: "numeric", month: "short", year: "numeric" }
@@ -40,20 +41,17 @@ export default function PromoListPage() {
             >
               {/* Promo Image */}
               <div className="relative h-48 w-full overflow-hidden bg-orange-100">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={promo.bannerUrl}
                   alt={promo.title}
+                  fill
+                  sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-orange-600 text-white text-xs font-bold shadow flex items-center gap-1">
                   <Tag className="w-3.5 h-3.5" />
                   <span>
-                    {promo.type === "discount"
-                      ? `Diskon ${promo.value}%`
-                      : promo.type === "cashback"
-                      ? `Cashback ${promo.value}%`
-                      : "Gratis Menu"}
+                    {getPromoBadgeLabel(promo)}
                   </span>
                 </div>
               </div>
@@ -96,6 +94,6 @@ export default function PromoListPage() {
           Semua promo di atas resmi dikeluarkan oleh HappyTaste Resto. Pastikan Anda telah menjadi member untuk menikmati promo eksklusif dan mengumpulkan poin loyalitas setiap kali bertransaksi.
         </p>
       </div>
-    </div>
+    </main>
   );
 }

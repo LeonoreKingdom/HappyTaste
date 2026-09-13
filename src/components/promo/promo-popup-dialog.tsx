@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import Image from "next/image";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Promo } from "@/types/promo";
+import type { Promo } from "@/types/promo";
 import { X, Sparkles, Tag, ArrowRight } from "lucide-react";
 
 interface PromoPopupDialogProps {
@@ -17,6 +18,7 @@ export function PromoPopupDialog({
   delayMs = 1200,
 }: PromoPopupDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     try {
@@ -34,6 +36,24 @@ export function PromoPopupDialog({
     }
   }, [sessionKey, delayMs]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    closeButtonRef.current?.focus();
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      previouslyFocused?.focus();
+    };
+  }, [isOpen]);
+
   const handleClose = () => {
     setIsOpen(false);
   };
@@ -45,17 +65,19 @@ export function PromoPopupDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="promo-popup-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+      aria-describedby="promo-popup-description"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
       onClick={handleClose}
     >
       <div
-        className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl border border-orange-100 animate-in zoom-in-95 duration-300"
+        className="relative w-full max-w-md overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
           type="button"
           onClick={handleClose}
+          ref={closeButtonRef}
           aria-label="Tutup Pop Up Promo"
           className="absolute right-3 top-3 z-10 p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur transition-all active:scale-90"
         >
@@ -66,12 +88,13 @@ export function PromoPopupDialog({
         <Link
           href={`/promo/${promo.id}`}
           onClick={handleClose}
-          className="block relative h-48 w-full overflow-hidden bg-orange-600 group cursor-pointer"
+          className="group relative block h-48 w-full cursor-pointer overflow-hidden bg-orange-600"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={promo.bannerUrl}
             alt={promo.title}
+            fill
+            sizes="(min-width: 768px) 448px, 100vw"
             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -97,7 +120,10 @@ export function PromoPopupDialog({
                 {promo.title}
               </h2>
             </Link>
-            <p className="text-sm text-gray-600 leading-relaxed">
+            <p
+              id="promo-popup-description"
+              className="text-sm text-gray-600 leading-relaxed"
+            >
               {promo.description}
             </p>
           </div>

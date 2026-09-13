@@ -30,7 +30,7 @@ export const mockPromos: Promo[] = [
     title: "Cashback Poin Member 2x Lipat",
     description: "Kumpulkan 2x poin loyalitas untuk transaksi di atas Rp 200.000.",
     type: "cashback",
-    value: 200,
+    value: 2,
     terms: "Poin akan otomatis masuk ke akun member setelah pesanan berstatus selesai.",
     startDate: "2026-09-10",
     endDate: "2026-10-10",
@@ -68,3 +68,21 @@ export const mockBanners: Banner[] = [
     promoId: "promo-3",
   },
 ];
+
+export const activePromos = mockPromos.filter((promo) => promo.isActive);
+
+export const activeBanners = mockBanners
+  .filter((banner) => banner.isActive)
+  .sort((a, b) => a.order - b.order);
+
+export function getPromoBadgeLabel(promo: Promo) {
+  if (promo.type === "discount") {
+    return `Diskon ${promo.value}%`;
+  }
+
+  if (promo.type === "cashback") {
+    return `Cashback ${promo.value}x Poin`;
+  }
+
+  return "Gratis Menu";
+}

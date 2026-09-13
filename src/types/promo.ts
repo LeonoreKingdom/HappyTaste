@@ -8,7 +8,7 @@ export interface Promo {
   startDate: string;
   endDate: string;
   isActive: boolean;
-  bannerUrl?: string;
+  bannerUrl: string;
 }
 
 export interface Banner {

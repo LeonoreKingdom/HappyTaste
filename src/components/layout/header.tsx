@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Utensils, Tag, Calendar, MapPin, Phone, User } from "lucide-react";
+import { Utensils, Tag } from "lucide-react";
 
 export function Header() {
   return (
@@ -12,41 +12,28 @@ export function Header() {
           <span>HappyTaste</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
+        <nav
+          aria-label="Navigasi utama"
+          className="flex items-center gap-3 text-sm font-medium text-gray-700 sm:gap-6"
+        >
           <Link href="/" className="hover:text-orange-600 transition-colors">
             Beranda
           </Link>
-          <Link href="/menu" className="hover:text-orange-600 transition-colors flex items-center gap-1.5">
+          <Link
+            href="/menu"
+            className="flex items-center gap-1.5 transition-colors hover:text-orange-600"
+          >
             <Utensils className="w-4 h-4" />
             Menu
           </Link>
-          <Link href="/promo" className="hover:text-orange-600 transition-colors flex items-center gap-1.5 text-orange-600 font-semibold">
+          <Link
+            href="/promo"
+            className="flex items-center gap-1.5 transition-colors hover:text-orange-600"
+          >
             <Tag className="w-4 h-4" />
             Promo
           </Link>
-          <Link href="/reservasi" className="hover:text-orange-600 transition-colors flex items-center gap-1.5">
-            <Calendar className="w-4 h-4" />
-            Reservasi
-          </Link>
-          <Link href="/lokasi" className="hover:text-orange-600 transition-colors flex items-center gap-1.5">
-            <MapPin className="w-4 h-4" />
-            Outlet
-          </Link>
-          <Link href="/kontak" className="hover:text-orange-600 transition-colors flex items-center gap-1.5">
-            <Phone className="w-4 h-4" />
-            Kontak
-          </Link>
         </nav>
-
-        <div className="flex items-center gap-3">
-          <Link
-            href="/login"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-orange-200 text-orange-700 hover:bg-orange-50 text-sm font-medium transition-colors"
-          >
-            <User className="w-4 h-4" />
-            <span>Member</span>
-          </Link>
-        </div>
       </div>
     </header>
   );

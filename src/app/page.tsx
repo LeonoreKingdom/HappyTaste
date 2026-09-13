@@ -1,31 +1,40 @@
+import Image from "next/image";
 import Link from "next/link";
-import { mockBanners, mockPromos } from "@/data/mock-promos";
+import { ArrowRight, Award, Sparkles, Tag, Utensils } from "lucide-react";
+
+import { MenuBrowser } from "@/components/menu/menu-browser";
 import { PromoCarousel } from "@/components/promo/promo-carousel";
 import { PromoPopupDialog } from "@/components/promo/promo-popup-dialog";
-import { Utensils, Calendar, MapPin, Sparkles, Tag, Gift, Award } from "lucide-react";
+import {
+  activeBanners,
+  activePromos,
+  getPromoBadgeLabel,
+} from "@/data/mock-promos";
 
 export default function HomePage() {
-  return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-12">
-      {/* Pop Up Promo Modal - Once Per Session */}
-      <PromoPopupDialog promo={mockPromos[0]} />
+  const featuredPromo = activePromos[0];
 
-      {/* Hero Promo Banner Carousel Section */}
-      <section aria-label="Banner Promo Bergilir">
-        <PromoCarousel banners={mockBanners} promos={mockPromos} />
+  return (
+    <main className="mx-auto w-full max-w-6xl space-y-14 px-5 py-8 sm:px-8 sm:py-12">
+      {featuredPromo ? <PromoPopupDialog promo={featuredPromo} /> : null}
+
+      <section aria-labelledby="promo-hero-title">
+        <h1 id="promo-hero-title" className="sr-only">
+          Promo HappyTaste Resto
+        </h1>
+        <PromoCarousel banners={activeBanners} promos={activePromos} />
       </section>
 
-      {/* Quick Access Actions */}
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <section aria-label="Akses cepat" className="grid gap-4 sm:grid-cols-2">
         <Link
           href="/menu"
-          className="flex items-center gap-4 p-5 rounded-xl bg-white border border-orange-100 shadow-sm hover:shadow-md hover:border-orange-300 transition-all group"
+          className="group flex items-center gap-4 rounded-xl border border-orange-100 bg-white p-5 shadow-sm transition-all hover:border-orange-300 hover:shadow-md"
         >
-          <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors">
-            <Utensils className="w-6 h-6" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-orange-600 transition-colors group-hover:bg-orange-600 group-hover:text-white">
+            <Utensils className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">
+            <h2 className="font-semibold text-gray-900 transition-colors group-hover:text-orange-600">
               Jelajah Menu
             </h2>
             <p className="text-xs text-gray-500">Pilihan hidangan lezat resto</p>
@@ -33,116 +42,115 @@ export default function HomePage() {
         </Link>
 
         <Link
-          href="/reservasi"
-          className="flex items-center gap-4 p-5 rounded-xl bg-white border border-orange-100 shadow-sm hover:shadow-md hover:border-orange-300 transition-all group"
+          href="/promo"
+          className="group flex items-center gap-4 rounded-xl border border-orange-100 bg-white p-5 shadow-sm transition-all hover:border-orange-300 hover:shadow-md"
         >
-          <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors">
-            <Calendar className="w-6 h-6" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600 transition-colors group-hover:bg-amber-600 group-hover:text-white">
+            <Tag className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="font-semibold text-gray-900 group-hover:text-amber-600 transition-colors">
-              Reservasi Meja
+            <h2 className="font-semibold text-gray-900 transition-colors group-hover:text-amber-600">
+              Lihat Semua Promo
             </h2>
-            <p className="text-xs text-gray-500">Pesan tempat tanpa antre</p>
-          </div>
-        </Link>
-
-        <Link
-          href="/lokasi"
-          className="flex items-center gap-4 p-5 rounded-xl bg-white border border-orange-100 shadow-sm hover:shadow-md hover:border-orange-300 transition-all group"
-        >
-          <div className="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center group-hover:bg-rose-600 group-hover:text-white transition-colors">
-            <MapPin className="w-6 h-6" />
-          </div>
-          <div>
-            <h2 className="font-semibold text-gray-900 group-hover:text-rose-600 transition-colors">
-              Lokasi Outlet
-            </h2>
-            <p className="text-xs text-gray-500">Temukan resto terdekat</p>
+            <p className="text-xs text-gray-500">Penawaran spesial HappyTaste</p>
           </div>
         </Link>
       </section>
 
-      {/* Promo List Section */}
-      <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-orange-600 font-semibold text-sm">
-              <Sparkles className="w-4 h-4" />
-              <span>Penawaran Terbatas</span>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900">Promo Menarik Minggu Ini</h2>
-          </div>
-          <Link
-            href="/promo"
-            className="text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors flex items-center gap-1"
-          >
-            Lihat Semua Promo &rarr;
-          </Link>
-        </div>
+      <MenuBrowser idPrefix="home-menu" />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {mockPromos.map((promo) => (
-            <div
-              key={promo.id}
-              className="bg-white rounded-xl border border-orange-100 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col"
-            >
-              <div className="h-44 relative overflow-hidden bg-orange-100">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={promo.bannerUrl}
-                  alt={promo.title}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-orange-600 text-white text-xs font-semibold flex items-center gap-1 shadow">
-                  <Tag className="w-3 h-3" />
-                  <span>Promo</span>
-                </div>
+      {activePromos.length > 0 ? (
+        <section aria-labelledby="promo-list-title" className="space-y-6">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 text-sm font-semibold text-orange-600">
+                <Sparkles className="h-4 w-4" />
+                <span>Penawaran Terbatas</span>
               </div>
-              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                <div className="space-y-2">
-                  <h3 className="font-bold text-gray-900 text-lg leading-snug">
-                    {promo.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 line-clamp-2">
-                    {promo.description}
-                  </p>
-                </div>
-                <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                  <span>Berlaku s.d {new Date(promo.endDate).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span>
+              <h2 id="promo-list-title" className="text-2xl font-bold text-gray-900">
+                Promo Menarik Minggu Ini
+              </h2>
+            </div>
+            <Link
+              href="/promo"
+              className="flex items-center gap-1 text-sm font-semibold text-orange-600 transition-colors hover:text-orange-700"
+            >
+              Lihat Semua <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {activePromos.map((promo) => (
+              <article
+                key={promo.id}
+                className="flex flex-col overflow-hidden rounded-xl border border-orange-100 bg-white shadow-sm transition-all hover:shadow-md"
+              >
+                <Link href={`/promo/${promo.id}`} className="group block">
+                  <div className="relative h-44 overflow-hidden bg-orange-100">
+                    <Image
+                      src={promo.bannerUrl}
+                      alt={promo.title}
+                      fill
+                      sizes="(min-width: 768px) 33vw, 100vw"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-orange-600 px-2.5 py-1 text-xs font-semibold text-white shadow">
+                      <Tag className="h-3 w-3" />
+                      <span>{getPromoBadgeLabel(promo)}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2 p-5">
+                    <h3 className="text-lg font-bold leading-snug text-gray-900 transition-colors group-hover:text-orange-600">
+                      {promo.title}
+                    </h3>
+                    <p className="line-clamp-2 text-sm text-gray-600">
+                      {promo.description}
+                    </p>
+                  </div>
+                </Link>
+                <div className="mt-auto flex items-center justify-between border-t border-gray-100 px-5 py-3 text-xs text-gray-500">
+                  <span>
+                    Berlaku s.d. {new Date(promo.endDate).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
                   <Link
                     href={`/promo/${promo.id}`}
                     className="font-semibold text-orange-600 hover:underline"
                   >
-                    Syarat & Detail
+                    Detail
                   </Link>
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
-      {/* Member Benefit Callout */}
-      <section className="rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md">
+      <section className="flex flex-col items-center justify-between gap-6 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 p-8 text-white shadow-md sm:flex-row">
         <div className="space-y-2 text-center sm:text-left">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-xs font-semibold">
-            <Award className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold">
+            <Award className="h-3.5 w-3.5" />
             <span>HappyTaste Loyalty Club</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold">Gabung Member & Dapatkan Poin Setiap Transaksi</h2>
-          <p className="text-sm text-amber-100 max-w-lg">
-            Nikmati kemudahan reservasi prioritas, pesan menu lebih awal, dan kumpulkan poin loyalitas yang dapat ditukar dengan sajian gratis.
+          <h2 className="text-xl font-bold sm:text-2xl">
+            Nikmati Menu Favorit dan Promo HappyTaste
+          </h2>
+          <p className="max-w-lg text-sm text-amber-100">
+            Jelajahi pilihan hidangan kami dan temukan penawaran yang cocok untuk
+            momen makanmu hari ini.
           </p>
         </div>
         <Link
-          href="/login"
-          className="whitespace-nowrap px-6 py-3 rounded-xl bg-white text-orange-600 hover:bg-orange-50 font-bold text-sm shadow-lg transition-transform active:scale-95 flex items-center gap-2"
+          href="/menu"
+          className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-white px-6 py-3 text-sm font-bold text-orange-600 shadow-lg transition-transform hover:bg-orange-50 active:scale-95"
         >
-          <Gift className="w-4 h-4" />
-          <span>Daftar Sekarang</span>
+          <Utensils className="h-4 w-4" />
+          <span>Lihat Menu</span>
         </Link>
       </section>
-    </div>
+    </main>
   );
 }

@@ -1,8 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { Banner, Promo } from "@/types/promo";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type KeyboardEvent,
+  type TouchEvent,
+} from "react";
+import type { Banner, Promo } from "@/types/promo";
 import { ChevronLeft, ChevronRight, Tag, Sparkles, ArrowRight } from "lucide-react";
 
 interface PromoCarouselProps {
@@ -48,17 +56,17 @@ export function PromoCarousel({
   }, [isPaused, total, autoPlayInterval, handleNext]);
 
   // Touch gesture handlers for mobile swipe
-  const onTouchStart = (e: React.TouchEvent) => {
+  const onTouchStart = (e: TouchEvent) => {
     touchStartX.current = e.targetTouches[0].clientX;
     touchEndX.current = null;
   };
 
-  const onTouchMove = (e: React.TouchEvent) => {
+  const onTouchMove = (e: TouchEvent) => {
     touchEndX.current = e.targetTouches[0].clientX;
   };
 
   const onTouchEnd = () => {
-    if (!touchStartX.current || !touchEndX.current) return;
+    if (touchStartX.current === null || touchEndX.current === null) return;
     const distance = touchStartX.current - touchEndX.current;
     if (distance > minSwipeDistance) {
       handleNext();
@@ -67,11 +75,26 @@ export function PromoCarousel({
     }
   };
 
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      handlePrev();
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      handleNext();
+    }
+  };
+
   if (banners.length === 0) return null;
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 shadow-xl select-none"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Promo HappyTaste"
+      tabIndex={0}
+      onKeyDown={onKeyDown}
+      className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 shadow-xl select-none focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={onTouchStart}
@@ -82,7 +105,7 @@ export function PromoCarousel({
 
       {/* Slider Container */}
       <div
-        className="flex transition-transform duration-500 ease-out"
+        className="flex transition-transform duration-500 ease-out motion-reduce:transition-none"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {banners.map((banner, index) => {
@@ -93,6 +116,7 @@ export function PromoCarousel({
           return (
             <div
               key={banner.id}
+              aria-hidden={index !== currentIndex}
               className="w-full flex-shrink-0 grid md:grid-cols-2 gap-6 p-6 sm:p-8 md:p-10 items-center text-white"
             >
               <div className="space-y-4">
@@ -101,10 +125,14 @@ export function PromoCarousel({
                   <span>Promo Spesial #{index + 1}</span>
                 </div>
 
-                <Link href={detailHref} className="block group">
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight group-hover:text-orange-100 transition-colors">
+                <Link
+                  href={detailHref}
+                  tabIndex={index === currentIndex ? 0 : -1}
+                  className="block group"
+                >
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight group-hover:text-orange-100 transition-colors">
                     {banner.title}
-                  </h1>
+                  </h2>
                 </Link>
 
                 <p className="text-orange-100 text-sm sm:text-base leading-relaxed line-clamp-3">
@@ -115,6 +143,7 @@ export function PromoCarousel({
                 <div className="pt-2 flex flex-wrap items-center gap-3">
                   <Link
                     href={detailHref}
+                    tabIndex={index === currentIndex ? 0 : -1}
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-orange-600 hover:bg-orange-50 font-semibold text-sm shadow-md transition-all transform active:scale-95"
                   >
                     <Tag className="w-4 h-4" />
@@ -126,12 +155,15 @@ export function PromoCarousel({
 
               <Link
                 href={detailHref}
+                tabIndex={index === currentIndex ? 0 : -1}
                 className="relative aspect-[16/9] md:aspect-[4/3] rounded-xl overflow-hidden shadow-2xl border border-white/20 bg-orange-700/50 block group cursor-pointer"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={banner.imageUrl}
                   alt={banner.title}
+                  fill
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                  priority={index === 0}
                   className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                   draggable={false}
                 />
@@ -176,6 +208,7 @@ export function PromoCarousel({
               type="button"
               onClick={() => handleDotClick(index)}
               aria-label={`Pindah ke banner ${index + 1}`}
+              aria-current={index === currentIndex ? "true" : undefined}
               className={`h-2.5 rounded-full transition-all ${
                 index === currentIndex
                   ? "w-7 bg-white"

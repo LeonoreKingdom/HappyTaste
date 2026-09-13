@@ -1,7 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { mockPromos } from "@/data/mock-promos";
-import { PromoVoucherCode } from "@/components/promo/promo-voucher-code";
+import { activePromos, getPromoBadgeLabel } from "@/data/mock-promos";
 import {
   ArrowLeft,
   Tag,
@@ -22,13 +22,13 @@ interface PromoDetailPageProps {
 
 export default async function PromoDetailPage({ params }: PromoDetailPageProps) {
   const { id } = await params;
-  const promo = mockPromos.find((p) => p.id === id);
+  const promo = activePromos.find((p) => p.id === id);
 
   if (!promo) {
     notFound();
   }
 
-  const otherPromos = mockPromos.filter((p) => p.id !== id);
+  const otherPromos = activePromos.filter((p) => p.id !== id);
 
   const startDateFormatted = new Date(promo.startDate).toLocaleDateString("id-ID", {
     day: "numeric",
@@ -41,10 +41,8 @@ export default async function PromoDetailPage({ params }: PromoDetailPageProps) 
     year: "numeric",
   });
 
-  const voucherCode = `HAPPY-${promo.id.toUpperCase()}-${promo.value || 30}`;
-
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+    <main className="max-w-4xl mx-auto px-4 py-8 space-y-8">
       {/* Breadcrumb Navigation */}
       <nav className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
         <Link href="/" className="hover:text-orange-600 transition-colors">
@@ -63,10 +61,11 @@ export default async function PromoDetailPage({ params }: PromoDetailPageProps) 
       {/* Hero Promo Header Card */}
       <div className="relative rounded-2xl overflow-hidden shadow-lg border border-orange-100 bg-white">
         <div className="h-64 sm:h-80 md:h-96 w-full relative overflow-hidden bg-orange-950">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={promo.bannerUrl}
             alt={promo.title}
+            fill
+            sizes="(min-width: 768px) 896px, 100vw"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
@@ -75,11 +74,7 @@ export default async function PromoDetailPage({ params }: PromoDetailPageProps) 
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-600 text-xs font-bold shadow">
                 <Tag className="w-3.5 h-3.5" />
-                {promo.type === "discount"
-                  ? `Diskon ${promo.value}%`
-                  : promo.type === "cashback"
-                  ? `Cashback ${promo.value}%`
-                  : "Gratis Menu"}
+                {getPromoBadgeLabel(promo)}
               </span>
               <span className="px-2.5 py-1 rounded-full bg-emerald-500/80 backdrop-blur text-white text-xs font-semibold">
                 Promo Aktif
@@ -121,9 +116,6 @@ export default async function PromoDetailPage({ params }: PromoDetailPageProps) 
             </div>
           </div>
 
-          {/* Voucher Code Box */}
-          <PromoVoucherCode code={voucherCode} />
-
           {/* Description */}
           <div className="space-y-3">
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -146,27 +138,27 @@ export default async function PromoDetailPage({ params }: PromoDetailPageProps) 
                 <div className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 font-bold flex items-center justify-center text-xs">
                   1
                 </div>
-                <h3 className="font-bold text-gray-900">Salin Kode</h3>
+                <h3 className="font-bold text-gray-900">Pilih Promo</h3>
                 <p className="text-gray-500 text-xs">
-                  Salin kode voucher di atas atau simpan halaman promo ini.
+                  Pilih penawaran yang sesuai dengan kebutuhanmu.
                 </p>
               </div>
               <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 space-y-1.5">
                 <div className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 font-bold flex items-center justify-center text-xs">
                   2
                 </div>
-                <h3 className="font-bold text-gray-900">Pilih Menu Resto</h3>
+                <h3 className="font-bold text-gray-900">Baca Syarat</h3>
                 <p className="text-gray-500 text-xs">
-                  Buka menu pesanan (scan QR meja atau order in advance).
+                  Pastikan masa berlaku dan ketentuan promo sudah sesuai.
                 </p>
               </div>
               <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 space-y-1.5">
                 <div className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 font-bold flex items-center justify-center text-xs">
                   3
                 </div>
-                <h3 className="font-bold text-gray-900">Klaim & Nikmati</h3>
+                <h3 className="font-bold text-gray-900">Nikmati Promo</h3>
                 <p className="text-gray-500 text-xs">
-                  Potongan otomatis diterapkan pada keranjang belanja Anda.
+                  Tunjukkan promo sesuai alur pemesanan HappyTaste.
                 </p>
               </div>
             </div>
@@ -219,7 +211,7 @@ export default async function PromoDetailPage({ params }: PromoDetailPageProps) 
               className="px-6 py-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-semibold text-sm shadow-md transition-all active:scale-95 flex items-center gap-2"
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>Pesan Sekarang & Gunakan Promo</span>
+              <span>Jelajahi Menu</span>
             </Link>
           </div>
         </div>
@@ -247,11 +239,12 @@ export default async function PromoDetailPage({ params }: PromoDetailPageProps) 
                 href={`/promo/${item.id}`}
                 className="group flex gap-4 p-4 rounded-xl bg-white border border-orange-100 shadow-sm hover:shadow-md hover:border-orange-300 transition-all"
               >
-                <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-orange-100">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-orange-100">
+                  <Image
                     src={item.bannerUrl}
                     alt={item.title}
+                    fill
+                    sizes="96px"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
@@ -276,6 +269,6 @@ export default async function PromoDetailPage({ params }: PromoDetailPageProps) 
           </div>
         </section>
       )}
-    </div>
+    </main>
   );
 }
