@@ -1,0 +1,88 @@
+import { Banner, Promo } from "@/types/promo";
+
+export const mockPromos: Promo[] = [
+  {
+    id: "promo-1",
+    title: "Diskon Spesial Pembukaan 30%",
+    description: "Nikmati potongan harga 30% untuk semua menu pilihan khas HappyTaste.",
+    type: "discount",
+    value: 30,
+    terms: "Berlaku untuk dine-in dan take away dengan minimal transaksi Rp 100.000. Tidak dapat digabungkan dengan promo lain.",
+    startDate: "2026-09-01",
+    endDate: "2026-09-30",
+    isActive: true,
+    bannerUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    id: "promo-2",
+    title: "Gratis Minuman Segar Nusantara",
+    description: "Dapatkan gratis 1 Es Teh Manis / Lemon Tea untuk setiap pembelian menu utama.",
+    type: "free_item",
+    value: 0,
+    terms: "Khusus member HappyTaste. Berlaku setiap hari Senin-Kamis pukul 11:00 - 17:00.",
+    startDate: "2026-09-05",
+    endDate: "2026-10-05",
+    isActive: true,
+    bannerUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    id: "promo-3",
+    title: "Cashback Poin Member 2x Lipat",
+    description: "Kumpulkan 2x poin loyalitas untuk transaksi di atas Rp 200.000.",
+    type: "cashback",
+    value: 2,
+    terms: "Poin akan otomatis masuk ke akun member setelah pesanan berstatus selesai.",
+    startDate: "2026-09-10",
+    endDate: "2026-10-10",
+    isActive: true,
+    bannerUrl: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=1200&q=80",
+  },
+];
+
+export const mockBanners: Banner[] = [
+  {
+    id: "banner-1",
+    title: "Diskon Spesial Pembukaan 30%",
+    imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80",
+    link: "/promo/promo-1",
+    order: 1,
+    isActive: true,
+    promoId: "promo-1",
+  },
+  {
+    id: "banner-2",
+    title: "Gratis Minuman Segar Nusantara",
+    imageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
+    link: "/promo/promo-2",
+    order: 2,
+    isActive: true,
+    promoId: "promo-2",
+  },
+  {
+    id: "banner-3",
+    title: "Cashback Poin Member 2x Lipat",
+    imageUrl: "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=1200&q=80",
+    link: "/promo/promo-3",
+    order: 3,
+    isActive: true,
+    promoId: "promo-3",
+  },
+];
+
+export const activePromos = mockPromos.filter((promo) => promo.isActive);
+
+export const activeBanners = mockBanners
+  .filter((banner) => banner.isActive)
+  .sort((a, b) => a.order - b.order);
+
+export function getPromoBadgeLabel(promo: Promo) {
+  if (promo.type === "discount") {
+    return `Diskon ${promo.value}%`;
+  }
+
+  if (promo.type === "cashback") {
+    return `Cashback ${promo.value}x Poin`;
+  }
+
+  return "Gratis Menu";
+}
