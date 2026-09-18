@@ -82,3 +82,31 @@ export async function getAllPromos(options?: GetPromosOptions) {
     .from(promos)
     .orderBy(desc(promos.createdAt));
 }
+
+/**
+ * Mengambil detail satu promo berdasarkan ID
+ */
+export async function getPromoById(
+  id: string,
+  options?: { withBanners?: boolean }
+) {
+  if (options?.withBanners) {
+    const promo = await db.query.promos.findFirst({
+      where: eq(promos.id, id),
+      with: {
+        banners: {
+          orderBy: [banners.sortOrder],
+        },
+      },
+    });
+    return promo || null;
+  }
+
+  const result = await db
+    .select()
+    .from(promos)
+    .where(eq(promos.id, id))
+    .limit(1);
+
+  return result[0] || null;
+}
