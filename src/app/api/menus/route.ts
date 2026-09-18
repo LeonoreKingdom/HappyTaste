@@ -1,4 +1,4 @@
-import { asc, eq, or } from "drizzle-orm";
+import { and, asc, eq, like, or } from "drizzle-orm";
 
 import { menuCategories, menus } from "@/db/schema";
 
@@ -19,7 +19,24 @@ type MenuListItem = {
 };
 
 export async function GET(request: Request) {
-  const categoryFilter = new URL(request.url).searchParams.get("category")?.trim();
+  const searchParams = new URL(request.url).searchParams;
+  const categoryFilter = searchParams.get("category")?.trim();
+  const keywordFilter = searchParams.get("q")?.trim();
+  const filters = [
+    categoryFilter
+      ? or(
+          eq(menuCategories.id, categoryFilter),
+          eq(menuCategories.name, categoryFilter),
+        )
+      : undefined,
+    keywordFilter
+      ? or(
+          like(menus.name, `%${keywordFilter}%`),
+          like(menus.description, `%${keywordFilter}%`),
+          like(menuCategories.name, `%${keywordFilter}%`),
+        )
+      : undefined,
+  ].filter((filter): filter is NonNullable<typeof filter> => filter !== undefined);
 
   try {
     const { db } = await import("@/db");
@@ -37,14 +54,7 @@ export async function GET(request: Request) {
       })
       .from(menus)
       .innerJoin(menuCategories, eq(menus.categoryId, menuCategories.id))
-      .where(
-        categoryFilter
-          ? or(
-              eq(menuCategories.id, categoryFilter),
-              eq(menuCategories.name, categoryFilter),
-            )
-          : undefined,
-      )
+      .where(filters.length > 0 ? and(...filters) : undefined)
       .orderBy(asc(menuCategories.name), asc(menus.name));
 
     const data: MenuListItem[] = rows.map((menu) => ({
