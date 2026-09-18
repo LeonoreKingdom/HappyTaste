@@ -83,18 +83,35 @@ export async function getAllPromos(options?: GetPromosOptions) {
     .orderBy(desc(promos.createdAt));
 }
 
+export interface GetPromoByIdOptions {
+  withBanners?: boolean;
+  onlyActive?: boolean;
+}
+
 /**
  * Mengambil detail satu promo berdasarkan ID
  */
 export async function getPromoById(
   id: string,
-  options?: { withBanners?: boolean }
+  options?: GetPromoByIdOptions
 ) {
+  const conditions = [eq(promos.id, id)];
+
+  if (options?.onlyActive) {
+    const now = new Date();
+    conditions.push(
+      eq(promos.isActive, true),
+      lte(promos.startDate, now),
+      gte(promos.endDate, now)
+    );
+  }
+
   if (options?.withBanners) {
     const promo = await db.query.promos.findFirst({
-      where: eq(promos.id, id),
+      where: and(...conditions),
       with: {
         banners: {
+          where: options.onlyActive ? eq(banners.isActive, true) : undefined,
           orderBy: [banners.sortOrder],
         },
       },
@@ -105,10 +122,20 @@ export async function getPromoById(
   const result = await db
     .select()
     .from(promos)
-    .where(eq(promos.id, id))
+    .where(and(...conditions))
     .limit(1);
 
   return result[0] || null;
+}
+
+/**
+ * Mengambil detail satu promo aktif dan dalam masa berlaku (khusus public API)
+ */
+export async function getActivePromoById(
+  id: string,
+  options?: { withBanners?: boolean }
+) {
+  return getPromoById(id, { ...options, onlyActive: true });
 }
 
 /**
@@ -135,6 +162,9 @@ export async function getActivePopupPromo() {
   return promo || null;
 }
 
+export const VALID_PROMO_TYPES = ["discount", "free_item", "cashback"] as const;
+export type PromoType = (typeof VALID_PROMO_TYPES)[number];
+
 export interface CreatePromoInput {
   id?: string;
   title: string;
@@ -159,9 +189,107 @@ export interface UpdatePromoInput {
 }
 
 /**
+ * Validasi input data promo untuk internal service / admin
+ */
+export function validatePromoInput(
+  input: Partial<CreatePromoInput>,
+  isUpdate: boolean = false
+): { valid: boolean; error?: string } {
+  if (!isUpdate) {
+    if (!input.title || typeof input.title !== "string" || !input.title.trim()) {
+      return { valid: false, error: "Judul promo (title) wajib diisi" };
+    }
+    if (!input.description || typeof input.description !== "string" || !input.description.trim()) {
+      return { valid: false, error: "Deskripsi promo (description) wajib diisi" };
+    }
+    if (!input.type || !VALID_PROMO_TYPES.includes(input.type as PromoType)) {
+      return {
+        valid: false,
+        error: `Tipe promo tidak valid. Pilihan valid: ${VALID_PROMO_TYPES.join(", ")}`,
+      };
+    }
+    if (
+      input.value !== undefined &&
+      (typeof input.value !== "number" || isNaN(input.value) || input.value < 0)
+    ) {
+      return { valid: false, error: "Nilai promo (value) harus berupa angka non-negatif" };
+    }
+    if (!input.terms || typeof input.terms !== "string" || !input.terms.trim()) {
+      return { valid: false, error: "Syarat dan ketentuan promo (terms) wajib diisi" };
+    }
+    if (!input.startDate) {
+      return { valid: false, error: "Tanggal mulai (startDate) wajib diisi" };
+    }
+    const start = new Date(input.startDate);
+    if (isNaN(start.getTime())) {
+      return { valid: false, error: "Format tanggal mulai (startDate) tidak valid" };
+    }
+    if (!input.endDate) {
+      return { valid: false, error: "Tanggal selesai (endDate) wajib diisi" };
+    }
+    const end = new Date(input.endDate);
+    if (isNaN(end.getTime())) {
+      return { valid: false, error: "Format tanggal selesai (endDate) tidak valid" };
+    }
+    if (start.getTime() > end.getTime()) {
+      return {
+        valid: false,
+        error: "Tanggal mulai tidak boleh lebih besar dari tanggal selesai (startDate <= endDate)",
+      };
+    }
+  } else {
+    if (input.title !== undefined && (typeof input.title !== "string" || !input.title.trim())) {
+      return { valid: false, error: "Judul promo (title) tidak boleh kosong" };
+    }
+    if (
+      input.type !== undefined &&
+      !VALID_PROMO_TYPES.includes(input.type as PromoType)
+    ) {
+      return {
+        valid: false,
+        error: `Tipe promo tidak valid. Pilihan valid: ${VALID_PROMO_TYPES.join(", ")}`,
+      };
+    }
+    if (
+      input.value !== undefined &&
+      (typeof input.value !== "number" || isNaN(input.value) || input.value < 0)
+    ) {
+      return { valid: false, error: "Nilai promo (value) harus berupa angka non-negatif" };
+    }
+    let startCheck: Date | undefined;
+    let endCheck: Date | undefined;
+    if (input.startDate !== undefined) {
+      startCheck = new Date(input.startDate);
+      if (isNaN(startCheck.getTime())) {
+        return { valid: false, error: "Format tanggal mulai (startDate) tidak valid" };
+      }
+    }
+    if (input.endDate !== undefined) {
+      endCheck = new Date(input.endDate);
+      if (isNaN(endCheck.getTime())) {
+        return { valid: false, error: "Format tanggal selesai (endDate) tidak valid" };
+      }
+    }
+    if (startCheck && endCheck && startCheck.getTime() > endCheck.getTime()) {
+      return {
+        valid: false,
+        error: "Tanggal mulai tidak boleh lebih besar dari tanggal selesai (startDate <= endDate)",
+      };
+    }
+  }
+
+  return { valid: true };
+}
+
+/**
  * Menambahkan promo baru ke database
  */
 export async function createPromo(input: CreatePromoInput) {
+  const validation = validatePromoInput(input, false);
+  if (!validation.valid) {
+    throw new Error(validation.error);
+  }
+
   const id = input.id || crypto.randomUUID();
   const startDate =
     typeof input.startDate === "string"
@@ -176,11 +304,11 @@ export async function createPromo(input: CreatePromoInput) {
     .insert(promos)
     .values({
       id,
-      title: input.title,
-      description: input.description,
+      title: input.title.trim(),
+      description: input.description.trim(),
       type: input.type,
       value: input.value ?? 0,
-      terms: input.terms,
+      terms: input.terms.trim(),
       startDate,
       endDate,
       isActive: input.isActive ?? true,
@@ -194,14 +322,41 @@ export async function createPromo(input: CreatePromoInput) {
  * Memperbarui data promo berdasarkan ID
  */
 export async function updatePromo(id: string, input: UpdatePromoInput) {
+  const validation = validatePromoInput(input, true);
+  if (!validation.valid) {
+    throw new Error(validation.error);
+  }
+
+  if (
+    (input.startDate !== undefined && input.endDate === undefined) ||
+    (input.startDate === undefined && input.endDate !== undefined)
+  ) {
+    const existing = await getPromoById(id);
+    if (existing) {
+      const start =
+        input.startDate !== undefined
+          ? new Date(input.startDate)
+          : new Date(existing.startDate);
+      const end =
+        input.endDate !== undefined
+          ? new Date(input.endDate)
+          : new Date(existing.endDate);
+      if (start.getTime() > end.getTime()) {
+        throw new Error(
+          "Tanggal mulai tidak boleh lebih besar dari tanggal selesai (startDate <= endDate)"
+        );
+      }
+    }
+  }
+
   const updateData: Partial<typeof promos.$inferInsert> = {};
 
-  if (input.title !== undefined) updateData.title = input.title;
+  if (input.title !== undefined) updateData.title = input.title.trim();
   if (input.description !== undefined)
-    updateData.description = input.description;
+    updateData.description = input.description.trim();
   if (input.type !== undefined) updateData.type = input.type;
   if (input.value !== undefined) updateData.value = input.value;
-  if (input.terms !== undefined) updateData.terms = input.terms;
+  if (input.terms !== undefined) updateData.terms = input.terms.trim();
   if (input.startDate !== undefined) {
     updateData.startDate =
       typeof input.startDate === "string"

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllPromos, createPromo } from "@/db/queries/promos";
+import { getAllPromos } from "@/db/queries/promos";
 
 export const dynamic = "force-dynamic";
 
@@ -32,56 +32,15 @@ export async function GET(request: NextRequest) {
 
 /**
  * Admin: Buat promo baru
+ * Guarded: Mutasi dinonaktifkan sementara sampai integrasi official Member/Auth tersedia
  */
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-
-    if (
-      !body.title ||
-      !body.description ||
-      !body.type ||
-      !body.terms ||
-      !body.startDate ||
-      !body.endDate
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "Field wajib: title, description, type, terms, startDate, endDate",
-        },
-        { status: 400 }
-      );
-    }
-
-    const newPromo = await createPromo({
-      id: body.id,
-      title: body.title,
-      description: body.description,
-      type: body.type,
-      value: typeof body.value === "number" ? body.value : 0,
-      terms: body.terms,
-      startDate: body.startDate,
-      endDate: body.endDate,
-      isActive: body.isActive !== false,
-    });
-
-    return NextResponse.json(
-      {
-        success: true,
-        data: newPromo,
-      },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error("Error creating promo in admin:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Gagal membuat promo baru",
-      },
-      { status: 500 }
-    );
-  }
+export async function POST() {
+  return NextResponse.json(
+    {
+      success: false,
+      error:
+        "Autentikasi admin diperlukan. Operasi mutasi data dinonaktifkan sementara menunggu modul official Member/Auth.",
+    },
+    { status: 401 }
+  );
 }
