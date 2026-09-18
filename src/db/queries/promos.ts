@@ -110,3 +110,27 @@ export async function getPromoById(
 
   return result[0] || null;
 }
+
+/**
+ * Mengambil satu promo aktif utama yang ditampilkan pada pop up promo beranda
+ */
+export async function getActivePopupPromo() {
+  const now = new Date();
+
+  const promo = await db.query.promos.findFirst({
+    where: and(
+      eq(promos.isActive, true),
+      lte(promos.startDate, now),
+      gte(promos.endDate, now)
+    ),
+    orderBy: [desc(promos.value), desc(promos.createdAt)],
+    with: {
+      banners: {
+        where: eq(banners.isActive, true),
+        orderBy: [banners.sortOrder],
+      },
+    },
+  });
+
+  return promo || null;
+}
