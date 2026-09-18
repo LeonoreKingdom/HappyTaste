@@ -3,6 +3,9 @@ import { getPromoById, updatePromo, deletePromo } from "@/db/queries/promos";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Admin: Ambil detail promo berdasarkan ID
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -29,7 +32,7 @@ export async function GET(
       data: promo,
     });
   } catch (error) {
-    console.error("Error fetching promo detail:", error);
+    console.error("Error fetching promo in admin:", error);
     return NextResponse.json(
       {
         success: false,
@@ -40,6 +43,9 @@ export async function GET(
   }
 }
 
+/**
+ * Admin: Update promo berdasarkan ID
+ */
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -75,7 +81,7 @@ export async function PUT(
       data: updated,
     });
   } catch (error) {
-    console.error("Error updating promo:", error);
+    console.error("Error updating promo in admin:", error);
     return NextResponse.json(
       {
         success: false,
@@ -93,6 +99,9 @@ export async function PATCH(
   return PUT(request, { params });
 }
 
+/**
+ * Admin: Hapus promo berdasarkan ID
+ */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -119,7 +128,7 @@ export async function DELETE(
       data: deleted,
     });
   } catch (error) {
-    console.error("Error deleting promo:", error);
+    console.error("Error deleting promo in admin:", error);
     return NextResponse.json(
       {
         success: false,
