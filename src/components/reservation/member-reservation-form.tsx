@@ -5,14 +5,13 @@ import { type FormEvent, useState } from "react";
 import {
   Armchair,
   ArrowLeft,
-  CalendarDays,
   Check,
-  Clock3,
   Info,
   MapPin,
   Users,
 } from "lucide-react";
 
+import { ArrivalScheduleStep } from "@/components/reservation/arrival-schedule-step";
 import {
   mockReservationOutlets,
   mockReservationTableTypes,
@@ -26,6 +25,8 @@ type ReservationPreview = {
   guestCount: number;
   tableType: string;
 };
+
+type ReservationStep = 1 | 2;
 
 const guestOptions = Array.from({ length: 8 }, (_, index) => index + 1);
 
@@ -44,6 +45,7 @@ export function MemberReservationForm() {
   const [arrivalTime, setArrivalTime] = useState<string>(mockReservationTimeSlots[0]);
   const [guestCount, setGuestCount] = useState(2);
   const [tableTypeId, setTableTypeId] = useState<string>(mockReservationTableTypes[0].id);
+  const [currentStep, setCurrentStep] = useState<ReservationStep>(1);
   const [formError, setFormError] = useState("");
   const [preview, setPreview] = useState<ReservationPreview | null>(null);
 
@@ -63,14 +65,21 @@ export function MemberReservationForm() {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!selectedOutlet || !selectedTableType) {
-      setFormError("Pilih outlet dan jenis meja yang sesuai dengan jumlah tamu.");
+    if (!isFutureReservation(arrivalDate, arrivalTime)) {
+      setFormError("Pilih tanggal dan waktu kunjungan yang akan datang.");
       setPreview(null);
       return;
     }
 
-    if (!isFutureReservation(arrivalDate, arrivalTime)) {
-      setFormError("Pilih tanggal dan waktu kunjungan yang akan datang.");
+    if (currentStep === 1) {
+      setFormError("");
+      setPreview(null);
+      setCurrentStep(2);
+      return;
+    }
+
+    if (!selectedOutlet || !selectedTableType) {
+      setFormError("Pilih outlet dan jenis meja yang sesuai dengan jumlah tamu.");
       setPreview(null);
       return;
     }
@@ -91,6 +100,7 @@ export function MemberReservationForm() {
     setArrivalTime(mockReservationTimeSlots[0]);
     setGuestCount(2);
     setTableTypeId(mockReservationTableTypes[0].id);
+    setCurrentStep(1);
     setFormError("");
     setPreview(null);
   }
@@ -125,152 +135,149 @@ export function MemberReservationForm() {
           <div className="mb-6">
             <p className="text-sm font-semibold text-orange-700">RANCANG KUNJUNGAN</p>
             <h2 id="reservation-form-title" className="mt-1 text-xl font-bold text-stone-900">
-              Detail reservasi demo
+              {currentStep === 1 ? "Jadwal kedatangan" : "Jumlah tamu & meja"}
             </h2>
           </div>
 
+          <ol aria-label="Langkah reservasi" className="mb-7 grid grid-cols-2 gap-3">
+            <li
+              aria-current={currentStep === 1 ? "step" : undefined}
+              className={`rounded-xl border p-3 text-sm ${
+                currentStep === 1
+                  ? "border-orange-400 bg-orange-50 text-orange-950"
+                  : "border-emerald-200 bg-emerald-50 text-emerald-900"
+              }`}
+            >
+              <span className="block text-xs font-semibold uppercase tracking-wide">Langkah 1</span>
+              <span className="mt-1 block font-semibold">Jadwal</span>
+            </li>
+            <li
+              aria-current={currentStep === 2 ? "step" : undefined}
+              className={`rounded-xl border p-3 text-sm ${
+                currentStep === 2
+                  ? "border-orange-400 bg-orange-50 text-orange-950"
+                  : "border-stone-200 bg-stone-50 text-stone-500"
+              }`}
+            >
+              <span className="block text-xs font-semibold uppercase tracking-wide">Langkah 2</span>
+              <span className="mt-1 block font-semibold">Tamu & meja</span>
+            </li>
+          </ol>
+
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="reservation-outlet" className="mb-2 block text-sm font-semibold text-stone-800">
-                Outlet
-              </label>
-              <div className="relative">
-                <MapPin aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-700" />
-                <select
-                  id="reservation-outlet"
-                  value={outletId}
-                  onChange={(event) => {
-                    setOutletId(event.target.value);
-                    clearFeedback();
-                  }}
-                  className="w-full appearance-none rounded-xl border border-orange-200 bg-white py-3 pl-10 pr-4 text-sm text-stone-900 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
-                >
-                  {mockReservationOutlets.map((outlet) => (
-                    <option key={outlet.id} value={outlet.id}>
-                      {outlet.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <p className="mt-2 text-xs leading-5 text-stone-500">
-                {selectedOutlet?.address}
-              </p>
-            </div>
-
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <label htmlFor="reservation-date" className="mb-2 block text-sm font-semibold text-stone-800">
-                  Tanggal kunjungan
-                </label>
-                <div className="relative">
-                  <CalendarDays aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-700" />
-                  <input
-                    id="reservation-date"
-                    type="date"
-                    value={arrivalDate}
-                    required
-                    onChange={(event) => {
-                      setArrivalDate(event.target.value);
-                      clearFeedback();
-                    }}
-                    className="w-full rounded-xl border border-orange-200 bg-white py-3 pl-10 pr-3 text-sm text-stone-900 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
-                  />
+            {currentStep === 1 ? (
+              <ArrivalScheduleStep
+                date={arrivalDate}
+                time={arrivalTime}
+                timeSlots={mockReservationTimeSlots}
+                onDateChange={(date) => {
+                  setArrivalDate(date);
+                  clearFeedback();
+                }}
+                onTimeChange={(time) => {
+                  setArrivalTime(time);
+                  clearFeedback();
+                }}
+              />
+            ) : (
+              <>
+                <div>
+                  <label htmlFor="reservation-outlet" className="mb-2 block text-sm font-semibold text-stone-800">
+                    Outlet
+                  </label>
+                  <div className="relative">
+                    <MapPin aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-700" />
+                    <select
+                      id="reservation-outlet"
+                      value={outletId}
+                      onChange={(event) => {
+                        setOutletId(event.target.value);
+                        clearFeedback();
+                      }}
+                      className="w-full appearance-none rounded-xl border border-orange-200 bg-white py-3 pl-10 pr-4 text-sm text-stone-900 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+                    >
+                      {mockReservationOutlets.map((outlet) => (
+                        <option key={outlet.id} value={outlet.id}>
+                          {outlet.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-stone-500">
+                    {selectedOutlet?.address}
+                  </p>
                 </div>
-              </div>
-              <div>
-                <label htmlFor="reservation-time" className="mb-2 block text-sm font-semibold text-stone-800">
-                  Waktu kunjungan
-                </label>
-                <div className="relative">
-                  <Clock3 aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-700" />
-                  <select
-                    id="reservation-time"
-                    value={arrivalTime}
-                    required
-                    onChange={(event) => {
-                      setArrivalTime(event.target.value);
-                      clearFeedback();
-                    }}
-                    className="w-full appearance-none rounded-xl border border-orange-200 bg-white py-3 pl-10 pr-4 text-sm text-stone-900 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
-                  >
-                    {mockReservationTimeSlots.map((slot) => (
-                      <option key={slot} value={slot}>
-                        {slot}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
 
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <label htmlFor="reservation-guests" className="mb-2 block text-sm font-semibold text-stone-800">
-                  Jumlah tamu
-                </label>
-                <div className="relative">
-                  <Users aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-700" />
-                  <select
-                    id="reservation-guests"
-                    value={guestCount}
-                    onChange={(event) => {
-                      setGuestCount(Number(event.target.value));
-                      clearFeedback();
-                    }}
-                    className="w-full appearance-none rounded-xl border border-orange-200 bg-white py-3 pl-10 pr-4 text-sm text-stone-900 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
-                  >
-                    {guestOptions.map((guest) => (
-                      <option key={guest} value={guest}>
-                        {guest} orang
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <fieldset>
-                <legend className="mb-2 block text-sm font-semibold text-stone-800">
-                  Tipe meja
-                </legend>
-                <div className="grid gap-2">
-                  {availableTableTypes.map((tableType) => {
-                    const isSelected = selectedTableType?.id === tableType.id;
-
-                    return (
-                      <label
-                        key={tableType.id}
-                        className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition focus-within:ring-4 focus-within:ring-orange-100 ${
-                          isSelected
-                            ? "border-orange-500 bg-orange-50"
-                            : "border-orange-100 bg-white hover:border-orange-300"
-                        }`}
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="reservation-guests" className="mb-2 block text-sm font-semibold text-stone-800">
+                      Jumlah tamu
+                    </label>
+                    <div className="relative">
+                      <Users aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-700" />
+                      <select
+                        id="reservation-guests"
+                        value={guestCount}
+                        onChange={(event) => {
+                          setGuestCount(Number(event.target.value));
+                          clearFeedback();
+                        }}
+                        className="w-full appearance-none rounded-xl border border-orange-200 bg-white py-3 pl-10 pr-4 text-sm text-stone-900 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
                       >
-                        <input
-                          type="radio"
-                          name="reservation-table-type"
-                          value={tableType.id}
-                          checked={isSelected}
-                          onChange={() => {
-                            setTableTypeId(tableType.id);
-                            clearFeedback();
-                          }}
-                          className="mt-1 h-4 w-4 accent-orange-700"
-                        />
-                        <span className="min-w-0 flex-1">
-                          <span className="flex items-center gap-2 font-semibold text-stone-900">
-                            <Armchair aria-hidden="true" className="h-4 w-4 shrink-0 text-orange-700" />
-                            {tableType.label}
-                          </span>
-                          <span className="mt-1 block text-xs leading-5 text-stone-600">
-                            {tableType.description}
-                          </span>
-                        </span>
-                      </label>
-                    );
-                  })}
+                        {guestOptions.map((guest) => (
+                          <option key={guest} value={guest}>
+                            {guest} orang
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <fieldset>
+                    <legend className="mb-2 block text-sm font-semibold text-stone-800">
+                      Tipe meja
+                    </legend>
+                    <div className="grid gap-2">
+                      {availableTableTypes.map((tableType) => {
+                        const isSelected = selectedTableType?.id === tableType.id;
+
+                        return (
+                          <label
+                            key={tableType.id}
+                            className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition focus-within:ring-4 focus-within:ring-orange-100 ${
+                              isSelected
+                                ? "border-orange-500 bg-orange-50"
+                                : "border-orange-100 bg-white hover:border-orange-300"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="reservation-table-type"
+                              value={tableType.id}
+                              checked={isSelected}
+                              onChange={() => {
+                                setTableTypeId(tableType.id);
+                                clearFeedback();
+                              }}
+                              className="mt-1 h-4 w-4 accent-orange-700"
+                            />
+                            <span className="min-w-0 flex-1">
+                              <span className="flex items-center gap-2 font-semibold text-stone-900">
+                                <Armchair aria-hidden="true" className="h-4 w-4 shrink-0 text-orange-700" />
+                                {tableType.label}
+                              </span>
+                              <span className="mt-1 block text-xs leading-5 text-stone-600">
+                                {tableType.description}
+                              </span>
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
                 </div>
-              </fieldset>
-            </div>
+              </>
+            )}
 
             {formError ? (
               <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm leading-6 text-rose-900">
@@ -282,8 +289,20 @@ export function MemberReservationForm() {
               type="submit"
               className="inline-flex w-full items-center justify-center rounded-xl bg-orange-700 px-5 py-3 font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
             >
-              Tampilkan preview reservasi
+              {currentStep === 1 ? "Lanjut pilih jumlah tamu & meja" : "Tampilkan preview reservasi"}
             </button>
+            {currentStep === 2 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentStep(1);
+                  clearFeedback();
+                }}
+                className="inline-flex w-full items-center justify-center rounded-xl border border-orange-200 bg-white px-5 py-3 font-semibold text-orange-900 transition hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+              >
+                Kembali ke jadwal
+              </button>
+            ) : null}
           </form>
         </section>
 
