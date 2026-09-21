@@ -15,6 +15,13 @@
       "when": 1789331669662,
       "tag": "0001_peaceful_baron_strucker",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790020160418,
+      "tag": "0002_early_mauler",
+      "breakpoints": true
     }
   ]
 }
