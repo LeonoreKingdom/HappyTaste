@@ -106,6 +106,7 @@ export default function MyReservationsPage() {
               (item) => item.id === reservation.tableTypeId,
             );
             const presentation = statusPresentation[reservation.status];
+            const canEdit = reservation.status === "confirmed" || reservation.status === "pending";
 
             return (
               <li key={reservation.id}>
@@ -158,6 +159,14 @@ export default function MyReservationsPage() {
                   </dl>
 
                   <p className="mt-4 text-sm leading-6 text-stone-600">{presentation.description}</p>
+                  {canEdit ? (
+                    <Link
+                      href={`/reservation/my/edit/${reservation.id}`}
+                      className="mt-4 inline-flex items-center justify-center rounded-xl border border-orange-200 bg-white px-4 py-2.5 text-sm font-semibold text-orange-900 transition hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+                    >
+                      Ubah jadwal demo
+                    </Link>
+                  ) : null}
                 </article>
               </li>
             );
