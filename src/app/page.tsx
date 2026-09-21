@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Award, Sparkles, Tag, Utensils } from "lucide-react";
+import { ArrowRight, Award, ShoppingBag, Sparkles, Tag, Utensils } from "lucide-react";
 
 import { MenuBrowser } from "@/components/menu/menu-browser";
 import { PromoCarousel } from "@/components/promo/promo-carousel";
@@ -25,7 +25,7 @@ export default function HomePage() {
         <PromoCarousel banners={activeBanners} promos={activePromos} />
       </section>
 
-      <section aria-label="Akses cepat" className="grid gap-4 sm:grid-cols-2">
+      <section aria-label="Akses cepat" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link
           href="/menu"
           className="group flex items-center gap-4 rounded-xl border border-orange-100 bg-white p-5 shadow-sm transition-all hover:border-orange-300 hover:shadow-md"
@@ -53,6 +53,21 @@ export default function HomePage() {
               Lihat Semua Promo
             </h2>
             <p className="text-xs text-gray-500">Penawaran spesial HappyTaste</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/order"
+          className="group flex items-center gap-4 rounded-xl border border-orange-100 bg-white p-5 shadow-sm transition-all hover:border-orange-300 hover:shadow-md"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-stone-100 text-stone-700 transition-colors group-hover:bg-stone-800 group-hover:text-white">
+            <ShoppingBag className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-gray-900 transition-colors group-hover:text-orange-600">
+              Pesan Makanan
+            </h2>
+            <p className="text-xs text-gray-500">Susun pesanan favoritmu</p>
           </div>
         </Link>
       </section>
