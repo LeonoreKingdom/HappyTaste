@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import {
   ArrowLeft,
@@ -14,12 +15,14 @@ import {
 
 import type { MenuItem } from "@/data/mock-menu";
 import type { MockTable } from "@/data/mock-tables";
-import { useOrderCart } from "@/components/order/order-cart-provider";
+import {
+  type OrderMode,
+  type OrderPaymentMethod,
+  useOrderCart,
+} from "@/components/order/order-cart-provider";
 
-type OrderMode = "dine-in" | "advance";
-type PaymentMethod = "cash" | "card" | "qris";
 type PaymentOption = {
-  id: PaymentMethod;
+  id: OrderPaymentMethod;
   title: string;
   description: string;
   Icon: typeof Banknote;
@@ -63,9 +66,11 @@ export function OrderConfirmationPage({
   orderMode,
   table,
 }: OrderConfirmationPageProps) {
-  const { quantities } = useOrderCart();
-  const [selectedPayment, setSelectedPayment] = useState<PaymentMethod | null>(null);
-  const [confirmedPayment, setConfirmedPayment] = useState<PaymentMethod | null>(null);
+  const router = useRouter();
+  const { quantities, confirmMockOrder } = useOrderCart();
+  const [selectedPayment, setSelectedPayment] =
+    useState<OrderPaymentMethod | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const selectedMenus = menus.flatMap((menu) => {
     const quantity = quantities[menu.id] ?? 0;
     return quantity > 0 ? [{ menu, quantity }] : [];
@@ -87,14 +92,19 @@ export function OrderConfirmationPage({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (itemCount > 0 && canConfirm && selectedPayment) {
-      setConfirmedPayment(selectedPayment);
+    if (itemCount > 0 && canConfirm && orderMode && selectedPayment && !isSubmitting) {
+      setIsSubmitting(true);
+      confirmMockOrder({
+        quantities: Object.fromEntries(
+          selectedMenus.map(({ menu, quantity }) => [menu.id, quantity]),
+        ),
+        orderMode,
+        tableLabel: table?.label ?? null,
+        paymentMethod: selectedPayment,
+      });
+      router.push("/order/status");
     }
   }
-
-  const confirmedPaymentTitle = paymentOptions.find(
-    (option) => option.id === confirmedPayment,
-  )?.title;
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-8 px-5 py-8 sm:px-8 sm:py-12">
@@ -162,7 +172,6 @@ export function OrderConfirmationPage({
                           checked={isSelected}
                           onChange={() => {
                             setSelectedPayment(id);
-                            setConfirmedPayment(null);
                           }}
                           className="mt-1 h-4 w-4 accent-orange-700"
                         />
@@ -211,21 +220,11 @@ export function OrderConfirmationPage({
 
             <button
               type="submit"
-              disabled={!canConfirm || !selectedPayment}
+              disabled={!canConfirm || !selectedPayment || isSubmitting}
               className="inline-flex w-full items-center justify-center rounded-xl bg-orange-700 px-5 py-3 font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 disabled:cursor-not-allowed disabled:bg-stone-300 sm:w-auto"
             >
-              Konfirmasi simulasi
+              {isSubmitting ? "Membuka status pesanan..." : "Konfirmasi simulasi"}
             </button>
-
-            {confirmedPaymentTitle ? (
-              <p
-                role="status"
-                className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900"
-              >
-                Metode “{confirmedPaymentTitle}” dipilih. Ini hanya konfirmasi di
-                layar; pesanan belum dikirim dan tidak ada pembayaran diproses.
-              </p>
-            ) : null}
           </form>
 
           <aside
