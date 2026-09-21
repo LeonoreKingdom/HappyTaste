@@ -1,21 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Clock3, ExternalLink, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { ArrowLeft, Clock3, ExternalLink, MapPin } from "lucide-react";
 
 import { mockLocationContactInfo } from "@/data/mock-location-contact";
 import { mockReservationOutlets } from "@/data/mock-reservations";
 import { OutletOpeningStatus } from "@/components/location/outlet-opening-status";
+import { OutletContactChannels } from "@/components/location/outlet-contact-channels";
 
 type OutletDetailPageProps = {
   params: Promise<{ id: string }>;
 };
-
-const contactIcons = {
-  phone: Phone,
-  whatsapp: MessageCircle,
-  email: Mail,
-} as const;
 
 export function generateStaticParams() {
   return mockReservationOutlets.map((outlet) => ({ id: outlet.id }));
@@ -188,23 +183,7 @@ export default async function OutletDetailPage({ params }: OutletDetailPageProps
             Informasi kontak resmi belum ditambahkan pada data demo.
           </p>
         </div>
-        <ul className="grid gap-4 sm:grid-cols-3">
-          {mockLocationContactInfo.contactChannels.map((channel) => {
-            const Icon = contactIcons[channel.id];
-
-            return (
-              <li key={channel.id}>
-                <article className="h-full rounded-2xl border border-orange-100 bg-white p-5 shadow-sm">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 text-orange-700">
-                    <Icon aria-hidden="true" className="h-5 w-5" />
-                  </span>
-                  <h3 className="mt-4 font-semibold text-stone-900">{channel.label}</h3>
-                  <p className="mt-1 text-sm leading-6 text-stone-600">{channel.value}</p>
-                </article>
-              </li>
-            );
-          })}
-        </ul>
+        <OutletContactChannels />
       </section>
 
       <Link

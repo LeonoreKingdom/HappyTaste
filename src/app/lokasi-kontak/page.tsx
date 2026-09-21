@@ -1,20 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, MapPin, Mail, MessageCircle, Phone } from "lucide-react";
+import { ArrowRight, MapPin } from "lucide-react";
 
-import { mockLocationContactInfo } from "@/data/mock-location-contact";
 import { mockReservationOutlets } from "@/data/mock-reservations";
+import { OutletContactChannels } from "@/components/location/outlet-contact-channels";
 
 export const metadata: Metadata = {
   title: "Lokasi & Kontak (Demo) - HappyTaste Resto",
   description: "Informasi lokasi outlet dan kanal kontak demo HappyTaste Resto.",
 };
-
-const contactIcons = {
-  phone: Phone,
-  whatsapp: MessageCircle,
-  email: Mail,
-} as const;
 
 export default function LocationContactPage() {
   return (
@@ -84,23 +78,7 @@ export default function LocationContactPage() {
           </p>
         </div>
 
-        <ul className="grid gap-4 sm:grid-cols-3">
-          {mockLocationContactInfo.contactChannels.map((channel) => {
-            const Icon = contactIcons[channel.id];
-
-            return (
-              <li key={channel.id}>
-                <article className="h-full rounded-2xl border border-orange-100 bg-white p-5 shadow-sm">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 text-orange-700">
-                    <Icon aria-hidden="true" className="h-5 w-5" />
-                  </span>
-                  <h3 className="mt-4 font-semibold text-stone-900">{channel.label}</h3>
-                  <p className="mt-1 text-sm leading-6 text-stone-600">{channel.value}</p>
-                </article>
-              </li>
-            );
-          })}
-        </ul>
+        <OutletContactChannels />
       </section>
     </main>
   );
