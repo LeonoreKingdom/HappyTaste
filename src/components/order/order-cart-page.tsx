@@ -67,9 +67,12 @@ export function OrderCartPage({ menus, orderMode, table }: OrderCartPageProps) {
       </header>
 
       {selectedMenus.length === 0 ? (
-        <section className="rounded-3xl border border-dashed border-orange-200 bg-white px-6 py-14 text-center shadow-sm">
+        <section
+          aria-labelledby="empty-cart-title"
+          className="rounded-3xl border border-dashed border-orange-200 bg-white px-6 py-10 text-center shadow-sm sm:py-14"
+        >
           <ShoppingBag className="mx-auto h-12 w-12 text-orange-300" />
-          <h2 className="mt-4 text-xl font-bold text-stone-900">
+          <h2 id="empty-cart-title" className="mt-4 text-xl font-bold text-stone-900">
             Keranjangmu masih kosong
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-stone-600">
@@ -77,7 +80,7 @@ export function OrderCartPage({ menus, orderMode, table }: OrderCartPageProps) {
           </p>
           <Link
             href={returnHref}
-            className="mt-6 inline-flex items-center justify-center rounded-xl bg-orange-700 px-5 py-3 font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+            className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-orange-700 px-5 py-3 font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 sm:w-auto"
           >
             Pilih menu
           </Link>

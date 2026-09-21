@@ -37,12 +37,15 @@ export function OrderStatusScreen({ menus }: OrderStatusScreenProps) {
   if (!latestMockOrder) {
     return (
       <main className="mx-auto w-full max-w-3xl px-5 py-12 sm:px-8 sm:py-16">
-        <section className="rounded-3xl border border-orange-100 bg-white p-7 text-center shadow-sm sm:p-10">
+        <section
+          aria-labelledby="missing-order-title"
+          className="rounded-3xl border border-orange-100 bg-white p-6 text-center shadow-sm sm:p-10"
+        >
           <CircleDashed aria-hidden="true" className="mx-auto h-10 w-10 text-orange-700" />
           <p className="mt-5 text-sm font-semibold tracking-wide text-orange-700">
             STATUS SIMULASI
           </p>
-          <h1 className="mt-2 text-2xl font-bold text-stone-950 sm:text-3xl">
+          <h1 id="missing-order-title" className="mt-2 text-2xl font-bold text-stone-950 sm:text-3xl">
             Belum ada konfirmasi di sesi ini
           </h1>
           <p className="mx-auto mt-3 max-w-xl leading-7 text-stone-600">
@@ -52,7 +55,7 @@ export function OrderStatusScreen({ menus }: OrderStatusScreenProps) {
           </p>
           <Link
             href="/order"
-            className="mt-7 inline-flex items-center justify-center gap-2 rounded-xl bg-orange-700 px-5 py-3 font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+            className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-orange-700 px-5 py-3 font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 sm:w-auto"
           >
             <ArrowLeft aria-hidden="true" className="h-4 w-4" />
             Kembali ke pemesanan

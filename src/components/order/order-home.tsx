@@ -11,6 +11,7 @@ import {
   Minus,
   Plus,
   QrCode,
+  SearchX,
   ShoppingBag,
   Sparkles,
   Store,
@@ -108,7 +109,11 @@ export function OrderHome({
   }`;
 
   return (
-    <main className="mx-auto w-full max-w-6xl space-y-10 px-5 py-8 sm:px-8 sm:py-12">
+    <main
+      className={`mx-auto w-full max-w-6xl space-y-10 px-5 py-8 sm:px-8 sm:py-12 ${
+        itemCount > 0 ? "pb-24 sm:pb-28 lg:pb-12" : ""
+      }`}
+    >
       <div className="flex flex-wrap items-center gap-2 text-sm text-stone-500">
         <Link
           href={isMemberAdvancePage ? "/order" : "/"}
@@ -349,9 +354,30 @@ export function OrderHome({
           </div>
 
           {filteredMenus.length === 0 ? (
-            <p className="rounded-2xl border border-dashed border-orange-200 bg-white px-5 py-8 text-center text-stone-600">
-              Menu tidak ditemukan. Coba kata kunci atau kategori lain.
-            </p>
+            <section
+              aria-labelledby="empty-menu-title"
+              className="rounded-2xl border border-dashed border-orange-200 bg-white px-5 py-8 text-center shadow-sm"
+            >
+              <SearchX aria-hidden="true" className="mx-auto h-10 w-10 text-orange-300" />
+              <h3 id="empty-menu-title" className="mt-3 text-lg font-bold text-stone-900">
+                Menu tidak ditemukan
+              </h3>
+              <p role="status" className="mx-auto mt-2 max-w-md text-sm leading-6 text-stone-600">
+                {normalizedQuery
+                  ? `Tidak ada menu yang cocok dengan “${searchQuery.trim()}”.`
+                  : `Belum ada menu pada kategori “${selectedCategory}”.`}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("Semua");
+                }}
+                className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-orange-700 px-5 py-3 font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 sm:w-auto"
+              >
+                Tampilkan semua menu
+              </button>
+            </section>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {filteredMenus.map((menu) => {
@@ -464,7 +490,9 @@ export function OrderHome({
                 Pesananmu masih kosong
               </p>
               <p className="mt-1 text-xs leading-5 text-stone-600">
-                Pilih cara pesan, lalu tambahkan menu favoritmu.
+                {selectedMode
+                  ? "Tambahkan menu favorit untuk mulai menyusun pesanan."
+                  : "Pilih cara pesan, lalu tambahkan menu favoritmu."}
               </p>
             </div>
           ) : (
@@ -514,27 +542,32 @@ export function OrderHome({
       </div>
 
       {itemCount > 0 ? (
-        <a
-          href="#order-summary"
-          aria-label={`Buka keranjang, ${itemCount} item, subtotal ${rupiah.format(subtotal)}`}
-          className="fixed bottom-4 right-4 z-30 inline-flex items-center gap-3 rounded-full bg-orange-700 py-3 pl-4 pr-5 text-white shadow-xl transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 lg:hidden"
-        >
-          <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white/15">
-            <ShoppingBag aria-hidden="true" className="h-5 w-5" />
-            <span
-              aria-hidden="true"
-              className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-xs font-bold text-orange-900"
-            >
-              {itemCount > 99 ? "99+" : itemCount}
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-orange-100 bg-white/95 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] shadow-[0_-6px_18px_rgba(120,53,15,0.08)] backdrop-blur lg:hidden">
+          <a
+            href="#order-summary"
+            aria-label={`Buka keranjang, ${itemCount} item, subtotal ${rupiah.format(subtotal)}`}
+            className="mx-auto flex min-h-12 w-full max-w-6xl items-center justify-between gap-3 rounded-xl bg-orange-700 px-4 py-2 text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+          >
+            <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15">
+              <ShoppingBag aria-hidden="true" className="h-5 w-5" />
+              <span
+                aria-hidden="true"
+                className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-xs font-bold text-orange-900"
+              >
+                {itemCount > 99 ? "99+" : itemCount}
+              </span>
             </span>
-          </span>
-          <span className="text-left text-sm font-semibold">
-            Keranjang
-            <span className="block text-xs font-medium text-orange-100">
-              {rupiah.format(subtotal)}
+            <span className="text-left text-sm font-semibold">
+              Keranjang
+              <span className="block text-xs font-medium text-orange-100">
+                {rupiah.format(subtotal)}
+              </span>
             </span>
-          </span>
-        </a>
+            <span className="ml-auto inline-flex items-center gap-1 text-sm font-semibold">
+              Tinjau <ArrowRight aria-hidden="true" className="h-4 w-4" />
+            </span>
+          </a>
+        </div>
       ) : null}
     </main>
   );

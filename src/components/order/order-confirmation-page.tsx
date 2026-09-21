@@ -129,14 +129,19 @@ export function OrderConfirmationPage({
       </header>
 
       {itemCount === 0 ? (
-        <section className="rounded-3xl border border-dashed border-orange-200 bg-white px-6 py-14 text-center shadow-sm">
-          <p className="text-xl font-bold text-stone-900">Keranjangmu masih kosong</p>
+        <section
+          aria-labelledby="empty-confirmation-title"
+          className="rounded-3xl border border-dashed border-orange-200 bg-white px-6 py-10 text-center shadow-sm sm:py-14"
+        >
+          <h2 id="empty-confirmation-title" className="text-xl font-bold text-stone-900">
+            Keranjangmu masih kosong
+          </h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-stone-600">
             Tambahkan menu terlebih dahulu sebelum memilih pembayaran.
           </p>
           <Link
             href="/order"
-            className="mt-6 inline-flex items-center justify-center rounded-xl bg-orange-700 px-5 py-3 font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+            className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-orange-700 px-5 py-3 font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 sm:w-auto"
           >
             Kembali ke pemesanan
           </Link>
