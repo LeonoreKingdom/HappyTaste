@@ -5,6 +5,7 @@ import { ArrowLeft, Clock3, ExternalLink, Mail, MapPin, MessageCircle, Phone } f
 
 import { mockLocationContactInfo } from "@/data/mock-location-contact";
 import { mockReservationOutlets } from "@/data/mock-reservations";
+import { OutletOpeningStatus } from "@/components/location/outlet-opening-status";
 
 type OutletDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -83,7 +84,8 @@ export default async function OutletDetailPage({ params }: OutletDetailPageProps
         className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-950"
       >
         Ini lokasi demo untuk development/testing, bukan alamat outlet resmi HappyTaste. Koordinat
-        berikut hanya digunakan untuk demonstrasi dan data resmi belum tersedia di project.
+        berikut hanya digunakan untuk demonstrasi. Jam, fasilitas, dan status buka juga simulasi;
+        informasi operasional resmi belum tersedia di project.
       </aside>
 
       <section aria-labelledby="outlet-details-title" className="grid gap-5 lg:grid-cols-2">
@@ -100,10 +102,41 @@ export default async function OutletDetailPage({ params }: OutletDetailPageProps
             </div>
             <div>
               <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
-                <Clock3 aria-hidden="true" className="h-4 w-4" /> Jam operasional
+                <Clock3 aria-hidden="true" className="h-4 w-4" /> Jam operasional demo
               </dt>
               <dd className="mt-1 leading-6 text-stone-800">
-                {mockLocationContactInfo.operatingHours}
+                <p>
+                  {mockLocationContactInfo.operatingHours.daysLabel},{" "}
+                  {mockLocationContactInfo.operatingHours.opensAt.replace(":", ".")}–
+                  {mockLocationContactInfo.operatingHours.closesAt.replace(":", ".")} WIB
+                  {" "}
+                  <span className="text-sm text-stone-500">(simulasi)</span>
+                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span className="text-sm text-stone-600">Status saat ini:</span>
+                  <OutletOpeningStatus
+                    opensAt={mockLocationContactInfo.operatingHours.opensAt}
+                    closesAt={mockLocationContactInfo.operatingHours.closesAt}
+                    timeZone={mockLocationContactInfo.operatingHours.timeZone}
+                  />
+                </div>
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-stone-500">
+                Fasilitas demo
+              </dt>
+              <dd>
+                <ul className="mt-2 flex flex-wrap gap-2">
+                  {mockLocationContactInfo.facilities.map((facility) => (
+                    <li
+                      key={facility}
+                      className="rounded-full bg-orange-50 px-3 py-1 text-sm text-orange-900"
+                    >
+                      {facility} <span className="text-orange-700">(contoh)</span>
+                    </li>
+                  ))}
+                </ul>
               </dd>
             </div>
           </dl>
