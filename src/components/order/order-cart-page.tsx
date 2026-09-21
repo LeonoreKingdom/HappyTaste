@@ -40,6 +40,9 @@ export function OrderCartPage({ menus, orderMode, table }: OrderCartPageProps) {
     .filter(Boolean)
     .join("&");
   const returnHref = orderQuery ? `/order?${orderQuery}` : "/order";
+  const confirmationHref = orderQuery
+    ? `/order/confirm?${orderQuery}`
+    : "/order/confirm";
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-8 px-5 py-8 sm:px-8 sm:py-12">
@@ -212,10 +215,20 @@ export function OrderCartPage({ menus, orderMode, table }: OrderCartPageProps) {
               >
                 <QrCode className="h-4 w-4" /> Scan QR meja
               </Link>
+            ) : orderMode ? (
+              <Link
+                href={confirmationHref}
+                className="inline-flex w-full items-center justify-center rounded-xl bg-orange-700 px-4 py-3 font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+              >
+                Lanjut ke konfirmasi
+              </Link>
             ) : (
-              <p role="status" className="rounded-lg bg-stone-50 p-3 text-sm text-stone-600">
-                Halaman ini hanya meninjau keranjang; pembayaran belum terhubung.
-              </p>
+              <Link
+                href={returnHref}
+                className="inline-flex w-full items-center justify-center rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 font-semibold text-orange-900 transition hover:bg-orange-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+              >
+                Pilih cara pesan
+              </Link>
             )}
           </aside>
         </div>
