@@ -2,7 +2,10 @@ export const mockReservationOutlets = [
   {
     id: "happy-taste-demo",
     name: "HappyTaste Resto — Outlet Demo",
-    address: "Alamat outlet demo belum tersedia.",
+    address: "Lokasi demo — bukan alamat outlet resmi",
+    latitude: -6.175392,
+    longitude: 106.827153,
+    isDemoLocation: true,
   },
 ] as const;
 

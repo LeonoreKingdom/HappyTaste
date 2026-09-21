@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Clock3, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { ArrowLeft, Clock3, ExternalLink, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 
 import { mockLocationContactInfo } from "@/data/mock-location-contact";
 import { mockReservationOutlets } from "@/data/mock-reservations";
@@ -40,6 +40,22 @@ export default async function OutletDetailPage({ params }: OutletDetailPageProps
 
   if (!outlet) notFound();
 
+  const mapPaddingDegrees = 0.006;
+  const mapParams = new URLSearchParams({
+    bbox: [
+      outlet.longitude - mapPaddingDegrees,
+      outlet.latitude - mapPaddingDegrees,
+      outlet.longitude + mapPaddingDegrees,
+      outlet.latitude + mapPaddingDegrees,
+    ].join(","),
+    layer: "mapnik",
+    marker: `${outlet.latitude},${outlet.longitude}`,
+  });
+  const mapUrl = `https://www.openstreetmap.org/export/embed.html?${mapParams.toString()}`;
+  const navigationUrl = new URL("https://www.google.com/maps/dir/");
+  navigationUrl.searchParams.set("api", "1");
+  navigationUrl.searchParams.set("destination", `${outlet.latitude},${outlet.longitude}`);
+
   return (
     <main className="mx-auto w-full max-w-5xl space-y-8 px-5 py-8 sm:px-8 sm:py-12">
       <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-stone-600">
@@ -66,7 +82,8 @@ export default async function OutletDetailPage({ params }: OutletDetailPageProps
         role="note"
         className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-950"
       >
-        Ini bukan alamat atau kanal kontak sungguhan. Data resmi belum tersedia di project.
+        Ini lokasi demo untuk development/testing, bukan alamat outlet resmi HappyTaste. Koordinat
+        berikut hanya digunakan untuk demonstrasi dan data resmi belum tersedia di project.
       </aside>
 
       <section aria-labelledby="outlet-details-title" className="grid gap-5 lg:grid-cols-2">
@@ -92,16 +109,41 @@ export default async function OutletDetailPage({ params }: OutletDetailPageProps
           </dl>
         </article>
 
-        <div
-          role="note"
-          className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-orange-200 bg-orange-50/70 p-6 text-center"
-        >
-          <MapPin aria-hidden="true" className="h-8 w-8 text-orange-600" />
-          <h2 className="mt-3 font-semibold text-stone-900">Peta outlet</h2>
-          <p className="mt-1 max-w-sm text-sm leading-6 text-stone-600">
-            {mockLocationContactInfo.mapAvailability}
+        <article className="overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-sm">
+          <div className="flex items-start justify-between gap-4 p-5 sm:p-6">
+            <div>
+              <p className="text-xs font-semibold tracking-wide text-orange-700">LOKASI DEMO</p>
+              <h2 className="mt-1 font-semibold text-stone-900">Peta koordinat demonstrasi</h2>
+              <p className="mt-1 text-sm leading-6 text-stone-600">
+                {mockLocationContactInfo.mapAvailability}
+              </p>
+            </div>
+            <MapPin aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-orange-600" />
+          </div>
+          <iframe
+            title={`Peta lokasi demo, bukan outlet resmi HappyTaste (${outlet.latitude}, ${outlet.longitude})`}
+            src={mapUrl}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            className="h-64 w-full border-y border-orange-100 bg-orange-50"
+          />
+          <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <p className="text-sm text-stone-700">
+              <span className="font-medium">Koordinat demo:</span> {outlet.latitude}, {outlet.longitude}
+            </p>
+            <a
+              href={navigationUrl.toString()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-orange-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+            >
+              Buka Navigasi <ExternalLink aria-hidden="true" className="h-4 w-4" />
+            </a>
+          </div>
+          <p className="px-5 pb-5 text-xs text-stone-500 sm:px-6 sm:pb-6">
+            Peta dari OpenStreetMap untuk demonstrasi koordinat saja. © OpenStreetMap contributors.
           </p>
-        </div>
+        </article>
       </section>
 
       <section aria-labelledby="outlet-contact-title" className="space-y-4">

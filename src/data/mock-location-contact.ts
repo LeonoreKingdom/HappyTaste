@@ -1,5 +1,5 @@
 export const mockLocationContactInfo = {
-  mapAvailability: "Peta outlet demo belum tersedia karena koordinat belum ditambahkan.",
+  mapAvailability: "Peta ini hanya menunjukkan koordinat demo, bukan lokasi outlet resmi HappyTaste.",
   operatingHours: "Jam operasional outlet demo belum tersedia.",
   contactChannels: [
     { id: "phone", label: "Telepon", value: "Nomor telepon demo belum tersedia." },
