@@ -124,9 +124,19 @@ export function OrderHome({ menus, initialTable }: OrderHomeProps) {
           aria-hidden="true"
           className="absolute -right-16 -top-24 -z-10 h-72 w-72 rounded-full bg-orange-400/20 blur-3xl"
         />
-        <div className="absolute right-6 top-6 hidden rounded-2xl border border-white/15 bg-white/10 p-4 text-orange-100 sm:block">
-          <ShoppingBag className="h-8 w-8" />
-        </div>
+        <a
+          href="#order-summary"
+          aria-label={`Buka keranjang, ${itemCount} item, subtotal ${rupiah.format(subtotal)}`}
+          className="absolute right-6 top-6 hidden rounded-2xl border border-white/15 bg-white/10 p-4 text-orange-100 transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 lg:block"
+        >
+          <ShoppingBag aria-hidden="true" className="h-8 w-8" />
+          <span
+            aria-hidden="true"
+            className="absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-white px-1 text-xs font-bold text-orange-900"
+          >
+            {itemCount > 99 ? "99+" : itemCount}
+          </span>
+        </a>
         <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold tracking-wide text-orange-100">
           <Sparkles className="h-4 w-4" />
           PEMESANAN HAPPYTASTE
@@ -392,8 +402,10 @@ export function OrderHome({ menus, initialTable }: OrderHomeProps) {
         </section>
 
         <aside
+          id="order-summary"
           aria-labelledby="order-summary-title"
-          className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm lg:sticky lg:top-24"
+          tabIndex={-1}
+          className="scroll-mt-24 rounded-2xl border border-orange-100 bg-white p-5 shadow-sm lg:sticky lg:top-24"
         >
           <p className="text-sm font-semibold text-orange-700">LANGKAH 3</p>
           <div className="mt-1 flex items-center justify-between gap-3">
@@ -457,6 +469,30 @@ export function OrderHome({ menus, initialTable }: OrderHomeProps) {
           ) : null}
         </aside>
       </div>
+
+      {itemCount > 0 ? (
+        <a
+          href="#order-summary"
+          aria-label={`Buka keranjang, ${itemCount} item, subtotal ${rupiah.format(subtotal)}`}
+          className="fixed bottom-4 right-4 z-30 inline-flex items-center gap-3 rounded-full bg-orange-700 py-3 pl-4 pr-5 text-white shadow-xl transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 lg:hidden"
+        >
+          <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white/15">
+            <ShoppingBag aria-hidden="true" className="h-5 w-5" />
+            <span
+              aria-hidden="true"
+              className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-xs font-bold text-orange-900"
+            >
+              {itemCount > 99 ? "99+" : itemCount}
+            </span>
+          </span>
+          <span className="text-left text-sm font-semibold">
+            Keranjang
+            <span className="block text-xs font-medium text-orange-100">
+              {rupiah.format(subtotal)}
+            </span>
+          </span>
+        </a>
+      ) : null}
     </main>
   );
 }
