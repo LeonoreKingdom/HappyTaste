@@ -40,9 +40,22 @@ function getContactAction(channel: LocationContactChannel) {
 }
 
 export function OutletContactChannels() {
+  const { contactChannels } = mockLocationContactInfo;
+
+  if (contactChannels.length === 0) {
+    return (
+      <p
+        role="status"
+        className="rounded-2xl border border-dashed border-orange-200 bg-orange-50/70 p-5 text-sm leading-6 text-stone-700"
+      >
+        Kanal kontak outlet belum tersedia.
+      </p>
+    );
+  }
+
   return (
-    <ul className="grid gap-4 sm:grid-cols-3">
-      {mockLocationContactInfo.contactChannels.map((channel) => {
+    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {contactChannels.map((channel) => {
         const Icon = contactIcons[channel.id];
         const action = getContactAction(channel);
 

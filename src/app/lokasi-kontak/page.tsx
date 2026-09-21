@@ -39,33 +39,46 @@ export default function LocationContactPage() {
           <p className="mt-1 text-sm text-stone-600">{mockReservationOutlets.length} outlet contoh</p>
         </div>
 
-        <div className="grid gap-5">
-          {mockReservationOutlets.map((outlet) => (
-            <article
-              key={outlet.id}
-              className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm transition hover:border-orange-200 hover:shadow-md sm:p-7"
-            >
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-start gap-3">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-700">
-                    <MapPin aria-hidden="true" className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <p className="text-xs font-semibold tracking-wide text-orange-700">OUTLET DEMO</p>
-                    <h3 className="mt-1 text-lg font-bold text-stone-950">{outlet.name}</h3>
-                    <p className="mt-2 text-sm leading-6 text-stone-600">{outlet.address}</p>
+        {mockReservationOutlets.length > 0 ? (
+          <div className="grid gap-5">
+            {mockReservationOutlets.map((outlet) => (
+              <article
+                key={outlet.id}
+                className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm transition hover:border-orange-200 hover:shadow-md sm:p-7"
+              >
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-700">
+                      <MapPin aria-hidden="true" className="h-5 w-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold tracking-wide text-orange-700">OUTLET DEMO</p>
+                      <h3 className="mt-1 break-words text-lg font-bold text-stone-950">{outlet.name}</h3>
+                      <p className="mt-2 break-words text-sm leading-6 text-stone-600">{outlet.address}</p>
+                    </div>
                   </div>
+                  <Link
+                    href={`/lokasi-kontak/${outlet.id}`}
+                    className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-orange-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 sm:w-auto"
+                  >
+                    Lihat detail outlet <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                  </Link>
                 </div>
-                <Link
-                  href={`/lokasi-kontak/${outlet.id}`}
-                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-orange-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
-                >
-                  Lihat detail outlet <ArrowRight aria-hidden="true" className="h-4 w-4" />
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div
+            role="status"
+            className="rounded-2xl border border-dashed border-orange-200 bg-orange-50/70 p-6 text-center sm:p-8"
+          >
+            <MapPin aria-hidden="true" className="mx-auto h-8 w-8 text-orange-600" />
+            <h3 className="mt-3 font-semibold text-stone-900">Belum ada outlet tersedia</h3>
+            <p className="mt-1 text-sm leading-6 text-stone-600">
+              Informasi outlet akan ditampilkan setelah data outlet tersedia.
+            </p>
+          </div>
+        )}
       </section>
 
       <section aria-labelledby="contact-title" className="space-y-4">
