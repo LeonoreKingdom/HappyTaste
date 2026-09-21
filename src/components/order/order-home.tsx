@@ -21,12 +21,14 @@ import {
   type MenuCategory,
   type MenuItem,
 } from "@/data/mock-menu";
+import type { MockTable } from "@/data/mock-tables";
 
 type OrderMode = "dine-in" | "advance";
 type CategoryFilter = "Semua" | MenuCategory;
 
 type OrderHomeProps = {
   menus: MenuItem[];
+  initialTable: MockTable | null;
 };
 
 const categoryFilters: CategoryFilter[] = ["Semua", ...menuCategories];
@@ -59,8 +61,10 @@ const orderModes: {
   },
 ];
 
-export function OrderHome({ menus }: OrderHomeProps) {
-  const [selectedMode, setSelectedMode] = useState<OrderMode | null>(null);
+export function OrderHome({ menus, initialTable }: OrderHomeProps) {
+  const [selectedMode, setSelectedMode] = useState<OrderMode | null>(
+    initialTable ? "dine-in" : null,
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryFilter>("Semua");
@@ -208,16 +212,28 @@ export function OrderHome({ menus }: OrderHomeProps) {
         </div>
 
         {selectedMode ? (
-          <p className="flex items-start gap-2 rounded-xl border border-orange-100 bg-orange-50/70 p-4 text-sm leading-6 text-stone-700">
-            {selectedMode === "dine-in" ? (
-              <QrCode className="mt-0.5 h-4 w-4 shrink-0 text-orange-700" />
-            ) : (
-              <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-orange-700" />
-            )}
-            {selectedMode === "dine-in"
-              ? "Pemesanan di tempat memerlukan QR meja. Pemindaian dan validasi meja belum terhubung pada simulasi ini."
-              : "Pemesanan lebih dulu khusus member. Login dan pengiriman pesanan belum terhubung pada simulasi ini."}
-          </p>
+          <div className="space-y-3 rounded-xl border border-orange-100 bg-orange-50/70 p-4 text-sm leading-6 text-stone-700">
+            <p className="flex items-start gap-2">
+              {selectedMode === "dine-in" ? (
+                <QrCode className="mt-0.5 h-4 w-4 shrink-0 text-orange-700" />
+              ) : (
+                <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-orange-700" />
+              )}
+              {selectedMode === "dine-in"
+                ? initialTable
+                  ? `${initialTable.label} dipilih dari QR demo. Validasi meja server belum tersedia.`
+                  : "Pemesanan di tempat memerlukan QR meja. Scan kode meja sebelum memilih menu."
+                : "Pemesanan lebih dulu khusus member. Login dan pengiriman pesanan belum terhubung pada simulasi ini."}
+            </p>
+            {selectedMode === "dine-in" && !initialTable ? (
+              <Link
+                href="/order/scan"
+                className="ml-6 inline-flex font-semibold text-orange-800 underline decoration-orange-300 underline-offset-4 hover:text-orange-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+              >
+                Buka pemindai QR meja
+              </Link>
+            ) : null}
+          </div>
         ) : null}
       </section>
 
