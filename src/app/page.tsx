@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Award, ShoppingBag, Sparkles, Tag, Utensils } from "lucide-react";
+import { ArrowRight, Award, CalendarDays, ShoppingBag, Sparkles, Tag, Utensils } from "lucide-react";
 
 import { MenuBrowser } from "@/components/menu/menu-browser";
 import { PromoCarousel } from "@/components/promo/promo-carousel";
@@ -25,7 +25,7 @@ export default function HomePage() {
         <PromoCarousel banners={activeBanners} promos={activePromos} />
       </section>
 
-      <section aria-label="Akses cepat" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <section aria-label="Akses cepat" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Link
           href="/menu"
           className="group flex items-center gap-4 rounded-xl border border-orange-100 bg-white p-5 shadow-sm transition-all hover:border-orange-300 hover:shadow-md"
@@ -68,6 +68,21 @@ export default function HomePage() {
               Pesan Makanan
             </h2>
             <p className="text-xs text-gray-500">Susun pesanan favoritmu</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/reservation"
+          className="group flex items-center gap-4 rounded-xl border border-orange-100 bg-white p-5 shadow-sm transition-all hover:border-orange-300 hover:shadow-md"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 transition-colors group-hover:bg-emerald-700 group-hover:text-white">
+            <CalendarDays className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-gray-900 transition-colors group-hover:text-emerald-700">
+              Reservasi Meja
+            </h2>
+            <p className="text-xs text-gray-500">Atur jadwal kunjungan member</p>
           </div>
         </Link>
       </section>
