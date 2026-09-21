@@ -10,12 +10,19 @@ export const metadata: Metadata = {
 };
 
 type OrderPageProps = {
-  searchParams: Promise<{ table?: string | string[] }>;
+  searchParams: Promise<{ mode?: string | string[]; table?: string | string[] }>;
 };
 
 export default async function OrderPage({ searchParams }: OrderPageProps) {
-  const { table } = await searchParams;
+  const { mode, table } = await searchParams;
   const initialTable = typeof table === "string" ? getMockTableById(table) ?? null : null;
+  const initialMode = initialTable
+    ? "dine-in"
+    : mode === "dine-in" || mode === "advance"
+      ? mode
+      : null;
 
-  return <OrderHome menus={mockMenus} initialTable={initialTable} />;
+  return (
+    <OrderHome menus={mockMenus} initialMode={initialMode} initialTable={initialTable} />
+  );
 }

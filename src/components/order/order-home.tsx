@@ -22,12 +22,14 @@ import {
   type MenuItem,
 } from "@/data/mock-menu";
 import type { MockTable } from "@/data/mock-tables";
+import { useOrderCart } from "@/components/order/order-cart-provider";
 
 type OrderMode = "dine-in" | "advance";
 type CategoryFilter = "Semua" | MenuCategory;
 
 type OrderHomeProps = {
   menus: MenuItem[];
+  initialMode: OrderMode | null;
   initialTable: MockTable | null;
 };
 
@@ -61,15 +63,14 @@ const orderModes: {
   },
 ];
 
-export function OrderHome({ menus, initialTable }: OrderHomeProps) {
+export function OrderHome({ menus, initialMode, initialTable }: OrderHomeProps) {
+  const { quantities, changeQuantity } = useOrderCart();
   const [selectedMode, setSelectedMode] = useState<OrderMode | null>(
-    initialTable ? "dine-in" : null,
+    initialTable ? "dine-in" : initialMode,
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryFilter>("Semua");
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [showReviewNotice, setShowReviewNotice] = useState(false);
 
   const normalizedQuery = searchQuery.trim().toLocaleLowerCase("id-ID");
   const filteredMenus = menus.filter((menu) => {
@@ -93,19 +94,9 @@ export function OrderHome({ menus, initialTable }: OrderHomeProps) {
     (total, item) => total + item.menu.price * item.quantity,
     0,
   );
-
-  function changeQuantity(menuId: string, delta: number) {
-    setQuantities((current) => {
-      const nextQuantity = Math.max(0, (current[menuId] ?? 0) + delta);
-      if (nextQuantity === 0) {
-        const remaining = { ...current };
-        delete remaining[menuId];
-        return remaining;
-      }
-      return { ...current, [menuId]: nextQuantity };
-    });
-    setShowReviewNotice(false);
-  }
+  const cartHref = `/order/cart?mode=${selectedMode ?? "dine-in"}${
+    initialTable ? `&table=${encodeURIComponent(initialTable.id)}` : ""
+  }`;
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-10 px-5 py-8 sm:px-8 sm:py-12">
@@ -180,7 +171,6 @@ export function OrderHome({ menus, initialTable }: OrderHomeProps) {
                 aria-pressed={isSelected}
                 onClick={() => {
                   setSelectedMode(id);
-                  setShowReviewNotice(false);
                 }}
                 className={`flex min-h-36 items-start gap-4 rounded-2xl border p-5 text-left transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 ${
                   isSelected
@@ -454,19 +444,22 @@ export function OrderHome({ menus, initialTable }: OrderHomeProps) {
           <p className="mt-2 text-xs leading-5 text-stone-500">
             Total akhir dan biaya lainnya akan dihitung saat checkout tersedia.
           </p>
-          <button
-            type="button"
-            disabled={itemCount === 0}
-            onClick={() => setShowReviewNotice(true)}
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-orange-700 px-4 py-3 font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 disabled:cursor-not-allowed disabled:bg-stone-300"
-          >
-            Tinjau pesanan <ArrowRight className="h-4 w-4" />
-          </button>
-          {showReviewNotice ? (
-            <p role="status" className="mt-3 rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-900">
-              Ini simulasi pesanan: belum dikirim atau disimpan ke server.
-            </p>
-          ) : null}
+          {itemCount === 0 ? (
+            <button
+              type="button"
+              disabled
+              className="mt-5 inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-stone-300 px-4 py-3 font-semibold text-white"
+            >
+              Tinjau pesanan <ArrowRight className="h-4 w-4" />
+            </button>
+          ) : (
+            <Link
+              href={cartHref}
+              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-orange-700 px-4 py-3 font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+            >
+              Tinjau pesanan <ArrowRight className="h-4 w-4" />
+            </Link>
+          )}
         </aside>
       </div>
 
