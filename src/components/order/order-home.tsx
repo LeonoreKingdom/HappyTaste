@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   ArrowRight,
@@ -31,6 +32,7 @@ type OrderHomeProps = {
   menus: MenuItem[];
   initialMode: OrderMode | null;
   initialTable: MockTable | null;
+  variant?: "default" | "member-advance";
 };
 
 const categoryFilters: CategoryFilter[] = ["Semua", ...menuCategories];
@@ -63,10 +65,17 @@ const orderModes: {
   },
 ];
 
-export function OrderHome({ menus, initialMode, initialTable }: OrderHomeProps) {
+export function OrderHome({
+  menus,
+  initialMode,
+  initialTable,
+  variant = "default",
+}: OrderHomeProps) {
+  const router = useRouter();
+  const isMemberAdvancePage = variant === "member-advance";
   const { quantities, changeQuantity } = useOrderCart();
   const [selectedMode, setSelectedMode] = useState<OrderMode | null>(
-    initialTable ? "dine-in" : initialMode,
+    isMemberAdvancePage ? "advance" : initialTable ? "dine-in" : initialMode,
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] =
@@ -101,12 +110,15 @@ export function OrderHome({ menus, initialMode, initialTable }: OrderHomeProps) 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-10 px-5 py-8 sm:px-8 sm:py-12">
       <div className="flex flex-wrap items-center gap-2 text-sm text-stone-500">
-        <Link href="/" className="transition-colors hover:text-orange-700">
-          Beranda
+        <Link
+          href={isMemberAdvancePage ? "/order" : "/"}
+          className="transition-colors hover:text-orange-700"
+        >
+          {isMemberAdvancePage ? "Pesan makanan" : "Beranda"}
         </Link>
         <span aria-hidden="true">/</span>
         <span aria-current="page" className="font-medium text-stone-800">
-          Pesan makanan
+          {isMemberAdvancePage ? "Pesan dulu member" : "Pesan makanan"}
         </span>
       </div>
 
@@ -130,14 +142,17 @@ export function OrderHome({ menus, initialMode, initialTable }: OrderHomeProps) 
         </a>
         <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold tracking-wide text-orange-100">
           <Sparkles className="h-4 w-4" />
-          PEMESANAN HAPPYTASTE
+          {isMemberAdvancePage ? "PESAN DULU · KHUSUS MEMBER" : "PEMESANAN HAPPYTASTE"}
         </p>
         <h1 className="max-w-2xl text-3xl font-bold tracking-tight sm:text-5xl">
-          Makan enak, pesan dengan cara yang nyaman.
+          {isMemberAdvancePage
+            ? "Siapkan pesanan sebelum tiba di resto."
+            : "Makan enak, pesan dengan cara yang nyaman."}
         </h1>
         <p className="mt-4 max-w-xl text-sm leading-6 text-orange-100 sm:text-base sm:leading-7">
-          Pilih cara pesan, temukan menu favorit, lalu susun pesananmu. Untuk saat
-          ini, pilihan menu dan keranjang berjalan sebagai simulasi.
+          {isMemberAdvancePage
+            ? "Pilih menu favorit lebih awal. Fitur ini masih berupa preview dan belum memverifikasi akun member atau mengirim pesanan."
+            : "Pilih cara pesan, temukan menu favorit, lalu susun pesananmu. Untuk saat ini, pilihan menu dan keranjang berjalan sebagai simulasi."}
         </p>
         <div className="mt-7 flex flex-wrap gap-3 text-xs font-medium text-orange-50 sm:text-sm">
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2">
@@ -149,93 +164,128 @@ export function OrderHome({ menus, initialMode, initialTable }: OrderHomeProps) 
         </div>
       </section>
 
-      <section aria-labelledby="order-mode-title" className="space-y-4">
-        <div>
-          <p className="text-sm font-semibold text-orange-700">LANGKAH 1</p>
-          <h2 id="order-mode-title" className="mt-1 text-2xl font-bold text-stone-900">
-            Pilih cara pesan
-          </h2>
-          <p className="mt-2 text-sm text-stone-600">
-            Cara pesan menentukan bagaimana pesananmu dipersiapkan.
-          </p>
-        </div>
+      {isMemberAdvancePage ? (
+        <section
+          aria-labelledby="member-advance-title"
+          className="space-y-3 rounded-2xl border border-orange-200 bg-orange-50/70 p-5"
+        >
+          <div className="flex items-start gap-3">
+            <Clock3 aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-orange-700" />
+            <div>
+              <p className="text-sm font-semibold tracking-wide text-orange-700">
+                LANGKAH 1 · KHUSUS MEMBER
+              </p>
+              <h2 id="member-advance-title" className="mt-1 text-xl font-bold text-stone-900">
+                Pesan lebih dulu
+              </h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-stone-700">
+                Pilih menu untuk menyiapkan pesanan sebelum kunjungan. Mode ini hanya demo:
+                login member belum tersedia, akun tidak diverifikasi, dan pesanan tidak
+                dikirim ke restoran.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/order"
+            className="ml-8 inline-flex font-semibold text-orange-900 underline decoration-orange-300 underline-offset-4 hover:text-orange-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+          >
+            Kembali ke pilihan cara pesan
+          </Link>
+        </section>
+      ) : (
+        <section aria-labelledby="order-mode-title" className="space-y-4">
+          <div>
+            <p className="text-sm font-semibold text-orange-700">LANGKAH 1</p>
+            <h2 id="order-mode-title" className="mt-1 text-2xl font-bold text-stone-900">
+              Pilih cara pesan
+            </h2>
+            <p className="mt-2 text-sm text-stone-600">
+              Cara pesan menentukan bagaimana pesananmu dipersiapkan.
+            </p>
+          </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          {orderModes.map(({ id, title, description, label, Icon }) => {
-            const isSelected = selectedMode === id;
+          <div className="grid gap-4 md:grid-cols-2">
+            {orderModes.map(({ id, title, description, label, Icon }) => {
+              const isSelected = selectedMode === id;
 
-            return (
-              <button
-                key={id}
-                type="button"
-                aria-pressed={isSelected}
-                onClick={() => {
-                  setSelectedMode(id);
-                }}
-                className={`flex min-h-36 items-start gap-4 rounded-2xl border p-5 text-left transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 ${
-                  isSelected
-                    ? "border-orange-500 bg-orange-50 shadow-sm"
-                    : "border-orange-100 bg-white hover:border-orange-300 hover:bg-orange-50/50"
-                }`}
-              >
-                <span
-                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => {
+                    if (id === "advance") {
+                      setSelectedMode("advance");
+                      router.push("/order/advance");
+                      return;
+                    }
+                    setSelectedMode(id);
+                  }}
+                  className={`flex min-h-36 items-start gap-4 rounded-2xl border p-5 text-left transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 ${
                     isSelected
-                      ? "bg-orange-600 text-white"
-                      : "bg-orange-100 text-orange-700"
+                      ? "border-orange-500 bg-orange-50 shadow-sm"
+                      : "border-orange-100 bg-white hover:border-orange-300 hover:bg-orange-50/50"
                   }`}
                 >
-                  <Icon className="h-6 w-6" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex flex-wrap items-center gap-2 font-semibold text-stone-900">
-                    {title}
-                    <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-stone-500 ring-1 ring-stone-200">
-                      {label}
+                  <span
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${
+                      isSelected
+                        ? "bg-orange-600 text-white"
+                        : "bg-orange-100 text-orange-700"
+                    }`}
+                  >
+                    <Icon className="h-6 w-6" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-center gap-2 font-semibold text-stone-900">
+                      {title}
+                      <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-stone-500 ring-1 ring-stone-200">
+                        {label}
+                      </span>
+                    </span>
+                    <span className="mt-2 block text-sm leading-6 text-stone-600">
+                      {description}
                     </span>
                   </span>
-                  <span className="mt-2 block text-sm leading-6 text-stone-600">
-                    {description}
-                  </span>
-                </span>
-                <span
-                  aria-hidden="true"
-                  className={`mt-1 h-5 w-5 shrink-0 rounded-full border ${
-                    isSelected
-                      ? "border-orange-600 bg-orange-600 shadow-[inset_0_0_0_4px_white]"
-                      : "border-stone-300 bg-white"
-                  }`}
-                />
-              </button>
-            );
-          })}
-        </div>
-
-        {selectedMode ? (
-          <div className="space-y-3 rounded-xl border border-orange-100 bg-orange-50/70 p-4 text-sm leading-6 text-stone-700">
-            <p className="flex items-start gap-2">
-              {selectedMode === "dine-in" ? (
-                <QrCode className="mt-0.5 h-4 w-4 shrink-0 text-orange-700" />
-              ) : (
-                <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-orange-700" />
-              )}
-              {selectedMode === "dine-in"
-                ? initialTable
-                  ? `${initialTable.label} dipilih dari QR demo. Validasi meja server belum tersedia.`
-                  : "Pemesanan di tempat memerlukan QR meja. Scan kode meja sebelum memilih menu."
-                : "Pemesanan lebih dulu khusus member. Login dan pengiriman pesanan belum terhubung pada simulasi ini."}
-            </p>
-            {selectedMode === "dine-in" && !initialTable ? (
-              <Link
-                href="/order/scan"
-                className="ml-6 inline-flex font-semibold text-orange-800 underline decoration-orange-300 underline-offset-4 hover:text-orange-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
-              >
-                Buka pemindai QR meja
-              </Link>
-            ) : null}
+                  <span
+                    aria-hidden="true"
+                    className={`mt-1 h-5 w-5 shrink-0 rounded-full border ${
+                      isSelected
+                        ? "border-orange-600 bg-orange-600 shadow-[inset_0_0_0_4px_white]"
+                        : "border-stone-300 bg-white"
+                    }`}
+                  />
+                </button>
+              );
+            })}
           </div>
-        ) : null}
-      </section>
+
+          {selectedMode ? (
+            <div className="space-y-3 rounded-xl border border-orange-100 bg-orange-50/70 p-4 text-sm leading-6 text-stone-700">
+              <p className="flex items-start gap-2">
+                {selectedMode === "dine-in" ? (
+                  <QrCode className="mt-0.5 h-4 w-4 shrink-0 text-orange-700" />
+                ) : (
+                  <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-orange-700" />
+                )}
+                {selectedMode === "dine-in"
+                  ? initialTable
+                    ? `${initialTable.label} dipilih dari QR demo. Validasi meja server belum tersedia.`
+                    : "Pemesanan di tempat memerlukan QR meja. Scan kode meja sebelum memilih menu."
+                  : "Pemesanan lebih dulu khusus member. Login dan pengiriman pesanan belum terhubung pada simulasi ini."}
+              </p>
+              {selectedMode === "dine-in" && !initialTable ? (
+                <Link
+                  href="/order/scan"
+                  className="ml-6 inline-flex font-semibold text-orange-800 underline decoration-orange-300 underline-offset-4 hover:text-orange-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+                >
+                  Buka pemindai QR meja
+                </Link>
+              ) : null}
+            </div>
+          ) : null}
+        </section>
+      )}
 
       <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_21rem]">
         <section aria-labelledby="menu-order-title" className="min-w-0 space-y-6">
@@ -244,7 +294,7 @@ export function OrderHome({ menus, initialMode, initialTable }: OrderHomeProps) 
             <div className="mt-1 flex flex-wrap items-end justify-between gap-3">
               <div>
                 <h2 id="menu-order-title" className="text-2xl font-bold text-stone-900">
-                  Pilih menu
+                  {isMemberAdvancePage ? "Pilih menu untuk pesan lebih dulu" : "Pilih menu"}
                 </h2>
                 <p className="mt-2 text-sm text-stone-600">
                   {filteredMenus.length} dari {menus.length} menu tersedia
@@ -400,7 +450,7 @@ export function OrderHome({ menus, initialMode, initialTable }: OrderHomeProps) 
           <p className="text-sm font-semibold text-orange-700">LANGKAH 3</p>
           <div className="mt-1 flex items-center justify-between gap-3">
             <h2 id="order-summary-title" className="text-xl font-bold text-stone-900">
-              Ringkasan pesanan
+              {isMemberAdvancePage ? "Ringkasan pre-order" : "Ringkasan pesanan"}
             </h2>
             <span className="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-bold text-orange-900">
               {itemCount} item
