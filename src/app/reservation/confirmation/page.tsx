@@ -179,7 +179,7 @@ export default async function ReservationConfirmationPage({
           Ini hanya preview antarmuka. Ketersediaan belum diperiksa, meja belum dipesan, dan data tidak dikirim atau disimpan.
         </p>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
           <Link
             href="/reservation"
             className="inline-flex items-center justify-center rounded-xl border border-orange-200 bg-white px-5 py-3 text-center font-semibold text-orange-900 transition hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
@@ -191,6 +191,12 @@ export default async function ReservationConfirmationPage({
             className="inline-flex items-center justify-center rounded-xl bg-orange-700 px-5 py-3 text-center font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
           >
             Kembali ke beranda
+          </Link>
+          <Link
+            href="/reservation/my"
+            className="inline-flex items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-center font-semibold text-emerald-900 transition hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200"
+          >
+            Lihat reservasi saya (demo)
           </Link>
         </div>
       </section>

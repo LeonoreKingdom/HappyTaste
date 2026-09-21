@@ -117,12 +117,20 @@ export function MemberReservationForm() {
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-8 px-5 py-8 sm:px-8 sm:py-12">
-      <Link
-        href="/"
-        className="inline-flex items-center gap-2 text-sm font-medium text-stone-600 transition hover:text-orange-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
-      >
-        <ArrowLeft aria-hidden="true" className="h-4 w-4" /> Kembali ke beranda
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm font-medium text-stone-600 transition hover:text-orange-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+        >
+          <ArrowLeft aria-hidden="true" className="h-4 w-4" /> Kembali ke beranda
+        </Link>
+        <Link
+          href="/reservation/my"
+          className="inline-flex items-center justify-center rounded-xl border border-orange-200 bg-white px-4 py-2.5 text-sm font-semibold text-orange-900 transition hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+        >
+          Reservasi saya (demo)
+        </Link>
+      </div>
 
       <header className="max-w-3xl">
         <p className="text-sm font-semibold tracking-wide text-orange-700">
