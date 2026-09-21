@@ -1,0 +1,143 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft, Clock3, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+
+import { mockLocationContactInfo } from "@/data/mock-location-contact";
+import { mockReservationOutlets } from "@/data/mock-reservations";
+
+type OutletDetailPageProps = {
+  params: Promise<{ id: string }>;
+};
+
+const contactIcons = {
+  phone: Phone,
+  whatsapp: MessageCircle,
+  email: Mail,
+} as const;
+
+export function generateStaticParams() {
+  return mockReservationOutlets.map((outlet) => ({ id: outlet.id }));
+}
+
+export const dynamicParams = false;
+
+export async function generateMetadata({ params }: OutletDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const outlet = mockReservationOutlets.find((item) => item.id === id);
+
+  return {
+    title: outlet ? `${outlet.name} - HappyTaste Resto` : "Outlet tidak ditemukan - HappyTaste Resto",
+    description: outlet
+      ? `Informasi demo lokasi dan kontak untuk ${outlet.name}.`
+      : "Detail outlet HappyTaste tidak ditemukan.",
+  };
+}
+
+export default async function OutletDetailPage({ params }: OutletDetailPageProps) {
+  const { id } = await params;
+  const outlet = mockReservationOutlets.find((item) => item.id === id);
+
+  if (!outlet) notFound();
+
+  return (
+    <main className="mx-auto w-full max-w-5xl space-y-8 px-5 py-8 sm:px-8 sm:py-12">
+      <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-stone-600">
+        <Link href="/lokasi-kontak" className="font-medium transition hover:text-orange-700">
+          Lokasi & Kontak
+        </Link>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page" className="text-stone-900">
+          {outlet.name}
+        </span>
+      </nav>
+
+      <header className="max-w-3xl">
+        <p className="text-sm font-semibold tracking-wide text-orange-700">DETAIL OUTLET DEMO</p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-stone-950 sm:text-4xl">
+          {outlet.name}
+        </h1>
+        <p className="mt-3 leading-7 text-stone-600">
+          Informasi ini memakai fixture demo yang sama dengan alur reservasi.
+        </p>
+      </header>
+
+      <aside
+        role="note"
+        className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-950"
+      >
+        Ini bukan alamat atau kanal kontak sungguhan. Data resmi belum tersedia di project.
+      </aside>
+
+      <section aria-labelledby="outlet-details-title" className="grid gap-5 lg:grid-cols-2">
+        <article className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm sm:p-7">
+          <h2 id="outlet-details-title" className="text-xl font-bold text-stone-900">
+            Informasi lokasi
+          </h2>
+          <dl className="mt-5 space-y-5 border-t border-stone-100 pt-5">
+            <div>
+              <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
+                <MapPin aria-hidden="true" className="h-4 w-4" /> Alamat
+              </dt>
+              <dd className="mt-1 leading-6 text-stone-800">{outlet.address}</dd>
+            </div>
+            <div>
+              <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
+                <Clock3 aria-hidden="true" className="h-4 w-4" /> Jam operasional
+              </dt>
+              <dd className="mt-1 leading-6 text-stone-800">
+                {mockLocationContactInfo.operatingHours}
+              </dd>
+            </div>
+          </dl>
+        </article>
+
+        <div
+          role="note"
+          className="flex min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-orange-200 bg-orange-50/70 p-6 text-center"
+        >
+          <MapPin aria-hidden="true" className="h-8 w-8 text-orange-600" />
+          <h2 className="mt-3 font-semibold text-stone-900">Peta outlet</h2>
+          <p className="mt-1 max-w-sm text-sm leading-6 text-stone-600">
+            {mockLocationContactInfo.mapAvailability}
+          </p>
+        </div>
+      </section>
+
+      <section aria-labelledby="outlet-contact-title" className="space-y-4">
+        <div>
+          <h2 id="outlet-contact-title" className="text-xl font-bold text-stone-900">
+            Kontak outlet
+          </h2>
+          <p className="mt-1 text-sm text-stone-600">
+            Informasi kontak resmi belum ditambahkan pada data demo.
+          </p>
+        </div>
+        <ul className="grid gap-4 sm:grid-cols-3">
+          {mockLocationContactInfo.contactChannels.map((channel) => {
+            const Icon = contactIcons[channel.id];
+
+            return (
+              <li key={channel.id}>
+                <article className="h-full rounded-2xl border border-orange-100 bg-white p-5 shadow-sm">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 text-orange-700">
+                    <Icon aria-hidden="true" className="h-5 w-5" />
+                  </span>
+                  <h3 className="mt-4 font-semibold text-stone-900">{channel.label}</h3>
+                  <p className="mt-1 text-sm leading-6 text-stone-600">{channel.value}</p>
+                </article>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      <Link
+        href="/lokasi-kontak"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-orange-800 transition hover:text-orange-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+      >
+        <ArrowLeft aria-hidden="true" className="h-4 w-4" /> Kembali ke semua outlet
+      </Link>
+    </main>
+  );
+}

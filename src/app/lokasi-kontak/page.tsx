@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Clock3, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, MapPin, Mail, MessageCircle, Phone } from "lucide-react";
 
 import { mockLocationContactInfo } from "@/data/mock-location-contact";
 import { mockReservationOutlets } from "@/data/mock-reservations";
@@ -48,9 +49,9 @@ export default function LocationContactPage() {
           {mockReservationOutlets.map((outlet) => (
             <article
               key={outlet.id}
-              className="grid gap-6 rounded-2xl border border-orange-100 bg-white p-5 shadow-sm sm:p-7 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.9fr)]"
+              className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm transition hover:border-orange-200 hover:shadow-md sm:p-7"
             >
-              <div>
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-700">
                     <MapPin aria-hidden="true" className="h-5 w-5" />
@@ -58,36 +59,15 @@ export default function LocationContactPage() {
                   <div>
                     <p className="text-xs font-semibold tracking-wide text-orange-700">OUTLET DEMO</p>
                     <h3 className="mt-1 text-lg font-bold text-stone-950">{outlet.name}</h3>
+                    <p className="mt-2 text-sm leading-6 text-stone-600">{outlet.address}</p>
                   </div>
                 </div>
-
-                <dl className="mt-6 space-y-4 border-t border-stone-100 pt-5">
-                  <div>
-                    <dt className="text-xs font-semibold uppercase tracking-wide text-stone-500">
-                      Alamat
-                    </dt>
-                    <dd className="mt-1 leading-6 text-stone-800">{outlet.address}</dd>
-                  </div>
-                  <div>
-                    <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
-                      <Clock3 aria-hidden="true" className="h-4 w-4" /> Jam operasional
-                    </dt>
-                    <dd className="mt-1 leading-6 text-stone-800">
-                      {mockLocationContactInfo.operatingHours}
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-
-              <div
-                role="note"
-                className="flex min-h-52 flex-col items-center justify-center rounded-xl border border-dashed border-orange-200 bg-orange-50/70 p-6 text-center"
-              >
-                <MapPin aria-hidden="true" className="h-8 w-8 text-orange-600" />
-                <h4 className="mt-3 font-semibold text-stone-900">Peta outlet</h4>
-                <p className="mt-1 max-w-sm text-sm leading-6 text-stone-600">
-                  {mockLocationContactInfo.mapAvailability}
-                </p>
+                <Link
+                  href={`/lokasi-kontak/${outlet.id}`}
+                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-orange-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+                >
+                  Lihat detail outlet <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                </Link>
               </div>
             </article>
           ))}
