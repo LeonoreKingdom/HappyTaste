@@ -1,6 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Award, CalendarDays, ShoppingBag, Sparkles, Tag, Utensils } from "lucide-react";
+import {
+  ArrowRight,
+  Award,
+  CalendarDays,
+  MapPin,
+  ShoppingBag,
+  Sparkles,
+  Tag,
+  Utensils,
+} from "lucide-react";
 
 import { MenuBrowser } from "@/components/menu/menu-browser";
 import { PromoCarousel } from "@/components/promo/promo-carousel";
@@ -83,6 +92,21 @@ export default function HomePage() {
               Reservasi Meja
             </h2>
             <p className="text-xs text-gray-500">Atur jadwal kunjungan member</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/lokasi-kontak"
+          className="group flex items-center gap-4 rounded-xl border border-orange-100 bg-white p-5 shadow-sm transition-all hover:border-orange-300 hover:shadow-md"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-100 text-sky-700 transition-colors group-hover:bg-sky-700 group-hover:text-white">
+            <MapPin className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-gray-900 transition-colors group-hover:text-sky-700">
+              Lokasi & Kontak
+            </h2>
+            <p className="text-xs text-gray-500">Informasi outlet HappyTaste</p>
           </div>
         </Link>
       </section>
