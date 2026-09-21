@@ -3,15 +3,14 @@
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import {
-  Armchair,
   ArrowLeft,
   Check,
   Info,
   MapPin,
-  Users,
 } from "lucide-react";
 
 import { ArrivalScheduleStep } from "@/components/reservation/arrival-schedule-step";
+import { GuestAndTableStep } from "@/components/reservation/guest-and-table-step";
 import {
   mockReservationOutlets,
   mockReservationTableTypes,
@@ -27,8 +26,6 @@ type ReservationPreview = {
 };
 
 type ReservationStep = 1 | 2;
-
-const guestOptions = Array.from({ length: 8 }, (_, index) => index + 1);
 
 const dateFormatter = new Intl.DateTimeFormat("id-ID", {
   dateStyle: "full",
@@ -208,74 +205,19 @@ export function MemberReservationForm() {
                   </p>
                 </div>
 
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="reservation-guests" className="mb-2 block text-sm font-semibold text-stone-800">
-                      Jumlah tamu
-                    </label>
-                    <div className="relative">
-                      <Users aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-700" />
-                      <select
-                        id="reservation-guests"
-                        value={guestCount}
-                        onChange={(event) => {
-                          setGuestCount(Number(event.target.value));
-                          clearFeedback();
-                        }}
-                        className="w-full appearance-none rounded-xl border border-orange-200 bg-white py-3 pl-10 pr-4 text-sm text-stone-900 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
-                      >
-                        {guestOptions.map((guest) => (
-                          <option key={guest} value={guest}>
-                            {guest} orang
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <fieldset>
-                    <legend className="mb-2 block text-sm font-semibold text-stone-800">
-                      Tipe meja
-                    </legend>
-                    <div className="grid gap-2">
-                      {availableTableTypes.map((tableType) => {
-                        const isSelected = selectedTableType?.id === tableType.id;
-
-                        return (
-                          <label
-                            key={tableType.id}
-                            className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition focus-within:ring-4 focus-within:ring-orange-100 ${
-                              isSelected
-                                ? "border-orange-500 bg-orange-50"
-                                : "border-orange-100 bg-white hover:border-orange-300"
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name="reservation-table-type"
-                              value={tableType.id}
-                              checked={isSelected}
-                              onChange={() => {
-                                setTableTypeId(tableType.id);
-                                clearFeedback();
-                              }}
-                              className="mt-1 h-4 w-4 accent-orange-700"
-                            />
-                            <span className="min-w-0 flex-1">
-                              <span className="flex items-center gap-2 font-semibold text-stone-900">
-                                <Armchair aria-hidden="true" className="h-4 w-4 shrink-0 text-orange-700" />
-                                {tableType.label}
-                              </span>
-                              <span className="mt-1 block text-xs leading-5 text-stone-600">
-                                {tableType.description}
-                              </span>
-                            </span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </fieldset>
-                </div>
+                <GuestAndTableStep
+                  guestCount={guestCount}
+                  tableTypes={availableTableTypes}
+                  selectedTableTypeId={selectedTableType?.id}
+                  onGuestCountChange={(count) => {
+                    setGuestCount(count);
+                    clearFeedback();
+                  }}
+                  onTableTypeChange={(tableTypeId) => {
+                    setTableTypeId(tableTypeId);
+                    clearFeedback();
+                  }}
+                />
               </>
             )}
 
@@ -322,32 +264,28 @@ export function MemberReservationForm() {
                   <Check aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
                   Preview siap ditinjau. Belum ada meja yang dipesan atau data yang disimpan.
                 </p>
-                <dl className="space-y-3 text-sm">
-                  <div>
+                <dl className="mt-5 grid grid-cols-2 gap-x-3 gap-y-3 text-sm">
+                  <div className="col-span-2">
                     <dt className="text-xs font-medium uppercase tracking-wide text-stone-500">Outlet</dt>
                     <dd className="mt-1 font-semibold text-stone-900">{preview.outletName}</dd>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <dt className="text-xs font-medium uppercase tracking-wide text-stone-500">Tanggal</dt>
-                      <dd className="mt-1 font-semibold text-stone-900">
-                        {dateFormatter.format(new Date(`${preview.arrivalDate}T00:00:00`))}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-xs font-medium uppercase tracking-wide text-stone-500">Waktu</dt>
-                      <dd className="mt-1 font-semibold text-stone-900">{preview.arrivalTime}</dd>
-                    </div>
+                  <div>
+                    <dt className="text-xs font-medium uppercase tracking-wide text-stone-500">Tanggal</dt>
+                    <dd className="mt-1 font-semibold text-stone-900">
+                      {dateFormatter.format(new Date(`${preview.arrivalDate}T00:00:00`))}
+                    </dd>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <dt className="text-xs font-medium uppercase tracking-wide text-stone-500">Tamu</dt>
-                      <dd className="mt-1 font-semibold text-stone-900">{preview.guestCount} orang</dd>
-                    </div>
-                    <div>
-                      <dt className="text-xs font-medium uppercase tracking-wide text-stone-500">Meja</dt>
-                      <dd className="mt-1 font-semibold text-stone-900">{preview.tableType}</dd>
-                    </div>
+                  <div>
+                    <dt className="text-xs font-medium uppercase tracking-wide text-stone-500">Waktu</dt>
+                    <dd className="mt-1 font-semibold text-stone-900">{preview.arrivalTime}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-medium uppercase tracking-wide text-stone-500">Tamu</dt>
+                    <dd className="mt-1 font-semibold text-stone-900">{preview.guestCount} orang</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-medium uppercase tracking-wide text-stone-500">Meja</dt>
+                    <dd className="mt-1 font-semibold text-stone-900">{preview.tableType}</dd>
                   </div>
                 </dl>
                 <button
