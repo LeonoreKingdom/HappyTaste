@@ -18,10 +18,12 @@ import {
 } from "@/data/mock-reservations";
 
 type ReservationPreview = {
+  outletId: string;
   outletName: string;
   arrivalDate: string;
   arrivalTime: string;
   guestCount: number;
+  tableTypeId: string;
   tableType: string;
 };
 
@@ -53,6 +55,15 @@ export function MemberReservationForm() {
   const selectedTableType =
     availableTableTypes.find((tableType) => tableType.id === tableTypeId) ??
     availableTableTypes[0];
+  const confirmationHref = preview
+    ? `/reservation/confirmation?${new URLSearchParams({
+        date: preview.arrivalDate,
+        time: preview.arrivalTime,
+        guests: String(preview.guestCount),
+        outlet: preview.outletId,
+        table: preview.tableTypeId,
+      }).toString()}`
+    : null;
 
   function clearFeedback() {
     setFormError("");
@@ -83,10 +94,12 @@ export function MemberReservationForm() {
 
     setFormError("");
     setPreview({
+      outletId: selectedOutlet.id,
       outletName: selectedOutlet.name,
       arrivalDate,
       arrivalTime,
       guestCount,
+      tableTypeId: selectedTableType.id,
       tableType: selectedTableType.label,
     });
   }
@@ -288,6 +301,14 @@ export function MemberReservationForm() {
                     <dd className="mt-1 font-semibold text-stone-900">{preview.tableType}</dd>
                   </div>
                 </dl>
+                {confirmationHref ? (
+                  <Link
+                    href={confirmationHref}
+                    className="inline-flex w-full items-center justify-center rounded-xl bg-orange-700 px-4 py-3 text-center font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+                  >
+                    Lihat konfirmasi demo
+                  </Link>
+                ) : null}
                 <button
                   type="button"
                   onClick={resetForm}
