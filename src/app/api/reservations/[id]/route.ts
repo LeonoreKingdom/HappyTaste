@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import {
+  cancelMemberReservation,
   findMemberReservationById,
   reservationTableTypes,
   reservationTimeSlots,
@@ -142,6 +143,53 @@ export async function PATCH(
     console.error("Error updating reservation:", error);
     return NextResponse.json(
       { success: false, error: "Reservasi tidak dapat diubah." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const session = await requireMember(request);
+  if (!session) {
+    return NextResponse.json(
+      { success: false, error: "Login member diperlukan untuk membatalkan reservasi." },
+      { status: 401 },
+    );
+  }
+
+  const { id } = await params;
+  const reservationId = id.trim();
+  if (!reservationId || reservationId.length > 120) {
+    return NextResponse.json(
+      { success: false, error: "Reservasi tidak ditemukan." },
+      { status: 404 },
+    );
+  }
+
+  try {
+    const reservation = await cancelMemberReservation(reservationId, session.user.id);
+    if (!reservation) {
+      return NextResponse.json(
+        { success: false, error: "Reservasi tidak ditemukan." },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json({ success: true, data: reservation });
+  } catch (error) {
+    if (error instanceof ReservationValidationError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 400 },
+      );
+    }
+
+    console.error("Error cancelling reservation:", error);
+    return NextResponse.json(
+      { success: false, error: "Reservasi tidak dapat dibatalkan." },
       { status: 500 },
     );
   }

@@ -241,3 +241,23 @@ export async function updateMemberReservation(input: {
     updatedAt,
   };
 }
+
+export async function cancelMemberReservation(reservationId: string, userId: string) {
+  const existing = await findMemberReservationById(reservationId, userId);
+  if (!existing) return null;
+  if (existing.status !== "pending" && existing.status !== "confirmed") {
+    throw new ReservationValidationError(
+      "Reservasi dengan status ini tidak dapat dibatalkan.",
+    );
+  }
+
+  const updatedAt = new Date();
+  db.update(reservations)
+    .set({ status: "cancelled", updatedAt })
+    .where(
+      and(eq(reservations.id, reservationId), eq(reservations.userId, userId)),
+    )
+    .run();
+
+  return { ...existing, status: "cancelled" as const, updatedAt };
+}
