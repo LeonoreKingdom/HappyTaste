@@ -43,6 +43,13 @@
       "when": 1790084972295,
       "tag": "0005_furry_skin",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1790087129247,
+      "tag": "0006_warm_spencer_smythe",
+      "breakpoints": true
     }
   ]
 }
