@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { and, eq, notInArray } from "drizzle-orm";
 
 import {
@@ -10,6 +12,18 @@ import { reservations } from "@/db/schema";
 
 export const reservationTimeSlots = mockReservationTimeSlots;
 export const reservationTableTypes = mockReservationTableTypes;
+
+export type CreateMemberReservationInput = {
+  userId: string;
+  outletId: string;
+  tableTypeId: string;
+  arrivalDate: string;
+  arrivalTime: string;
+  guestCount: number;
+  notes?: string;
+};
+
+export class ReservationValidationError extends Error {}
 
 export async function getReservationAvailability(input: {
   outletId: string;
@@ -64,5 +78,50 @@ export async function getReservationAvailability(input: {
     guestCount: input.guestCount,
     tableTypes: matchingTableTypes,
     timeSlots,
+  };
+}
+
+export async function createMemberReservation(input: CreateMemberReservationInput) {
+  const availability = await getReservationAvailability({
+    outletId: input.outletId,
+    arrivalDate: input.arrivalDate,
+    guestCount: input.guestCount,
+  });
+
+  if (!availability) {
+    throw new ReservationValidationError("Outlet tidak ditemukan.");
+  }
+
+  const slot = availability.timeSlots.find((item) => item.time === input.arrivalTime);
+  if (!slot || !slot.tableTypes.some((item) => item.id === input.tableTypeId)) {
+    throw new ReservationValidationError(
+      "Tipe meja tidak sesuai dengan jumlah tamu atau slot tidak tersedia.",
+    );
+  }
+
+  const reservationId = randomUUID();
+  db.insert(reservations)
+    .values({
+      id: reservationId,
+      userId: input.userId,
+      outletId: input.outletId,
+      tableTypeId: input.tableTypeId,
+      arrivalDate: input.arrivalDate,
+      arrivalTime: input.arrivalTime,
+      guestCount: input.guestCount,
+      status: "pending",
+      notes: input.notes ?? null,
+    })
+    .run();
+
+  return {
+    id: reservationId,
+    outletId: input.outletId,
+    tableTypeId: input.tableTypeId,
+    arrivalDate: input.arrivalDate,
+    arrivalTime: input.arrivalTime,
+    guestCount: input.guestCount,
+    status: "pending" as const,
+    notes: input.notes ?? null,
   };
 }
