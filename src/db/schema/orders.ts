@@ -25,7 +25,7 @@ export const orders = sqliteTable(
   "orders",
   {
     id: text("id").primaryKey(),
-    // These IDs stay opaque until member, outlet, and table schemas are introduced.
+    // Member/outlet IDs remain opaque; the order service validates table ownership.
     userId: text("user_id"),
     outletId: text("outlet_id").notNull(),
     tableId: text("table_id"),
@@ -34,6 +34,7 @@ export const orders = sqliteTable(
     paymentMethod: text("payment_method", { enum: orderPaymentMethods }).notNull(),
     total: integer("total").notNull(),
     notes: text("notes"),
+    scheduledAt: integer("scheduled_at", { mode: "timestamp" }),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .default(sql`(unixepoch())`),
@@ -42,6 +43,7 @@ export const orders = sqliteTable(
     index("orders_user_id_idx").on(table.userId),
     index("orders_outlet_created_at_idx").on(table.outletId, table.createdAt),
     index("orders_status_created_at_idx").on(table.status, table.createdAt),
+    index("orders_scheduled_at_idx").on(table.scheduledAt),
     check("orders_total_non_negative", sql`${table.total} >= 0`),
     check(
       "orders_order_type_valid",

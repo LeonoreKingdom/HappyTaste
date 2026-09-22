@@ -23,6 +23,11 @@ export type CreateDineInOrderInput = {
   notes?: string;
 };
 
+export type CreateAdvanceOrderInput = Omit<CreateDineInOrderInput, "tableId"> & {
+  userId: string;
+  scheduledAt: Date;
+};
+
 export class OrderValidationError extends Error {}
 
 export async function createDineInOrder(input: CreateDineInOrderInput) {
@@ -31,6 +36,37 @@ export async function createDineInOrder(input: CreateDineInOrderInput) {
     throw new OrderValidationError("Meja tidak ditemukan untuk outlet ini.");
   }
 
+  const order = await createOrder({
+    ...input,
+    orderType: "dine_in",
+    tableId: input.tableId,
+    userId: undefined,
+    scheduledAt: undefined,
+  });
+
+  return { ...order, table };
+}
+
+export async function createAdvanceOrder(input: CreateAdvanceOrderInput) {
+  return createOrder({
+    ...input,
+    orderType: "advance",
+    tableId: undefined,
+    userId: input.userId,
+    scheduledAt: input.scheduledAt,
+  });
+}
+
+async function createOrder(input: {
+  outletId: string;
+  tableId: string | undefined;
+  userId: string | undefined;
+  orderType: "dine_in" | "advance";
+  paymentMethod: OrderPaymentMethod;
+  items: Array<{ menuId: string; quantity: number; notes?: string }>;
+  notes?: string;
+  scheduledAt: Date | undefined;
+}) {
   const menuIds = input.items.map((item) => item.menuId);
   const menuRows = await db
     .select({ id: menus.id, price: menus.price })
@@ -65,13 +101,15 @@ export async function createDineInOrder(input: CreateDineInOrderInput) {
     tx.insert(orders)
       .values({
         id: orderId,
+        userId: input.userId,
         outletId: input.outletId,
         tableId: input.tableId,
-        orderType: "dine_in",
+        orderType: input.orderType,
         status: "pending",
         paymentMethod: input.paymentMethod,
         total,
         notes: input.notes ?? null,
+        scheduledAt: input.scheduledAt ?? null,
       })
       .run();
     tx.insert(orderItems).values(itemRows).run();
@@ -81,11 +119,11 @@ export async function createDineInOrder(input: CreateDineInOrderInput) {
     id: orderId,
     outletId: input.outletId,
     tableId: input.tableId,
-    orderType: "dine_in" as const,
+    orderType: input.orderType,
     status: "pending" as const,
     paymentMethod: input.paymentMethod,
     total,
     itemCount: itemRows.reduce((sum, item) => sum + item.quantity, 0),
-    table,
+    scheduledAt: input.scheduledAt ?? null,
   };
 }

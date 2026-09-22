@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import {
+  createAdvanceOrder,
   createDineInOrder,
   OrderValidationError,
 } from "@/db/queries/orders";
 import { orderPaymentMethods } from "@/db/schema";
+import { requireMember } from "@/lib/auth-session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -50,10 +52,7 @@ function parseCreateOrderBody(body: unknown) {
   }
 
   const orderType = readRequiredString(body.orderType, "orderType", 20);
-  if (orderType === "advance") {
-    throw new OrderValidationError("Pesan lebih dulu membutuhkan login member.");
-  }
-  if (orderType !== "dine_in") {
+  if (orderType !== "dine_in" && orderType !== "advance") {
     throw new OrderValidationError("Jenis pesanan tidak didukung.");
   }
 
@@ -94,12 +93,38 @@ function parseCreateOrderBody(body: unknown) {
     };
   });
 
+  const scheduledAt = readOptionalString(body.scheduledAt, "scheduledAt", 80);
+  if (orderType === "advance" && !scheduledAt) {
+    throw new OrderValidationError("Jadwal pesan dulu wajib diisi.");
+  }
+  if (orderType === "dine_in" && scheduledAt) {
+    throw new OrderValidationError("Pesanan makan di tempat tidak memakai jadwal pre-order.");
+  }
+
+  const parsedScheduledAt = scheduledAt ? new Date(scheduledAt) : undefined;
+  if (
+    parsedScheduledAt &&
+    (Number.isNaN(parsedScheduledAt.getTime()) || parsedScheduledAt.getTime() <= Date.now())
+  ) {
+    throw new OrderValidationError("Jadwal pesan dulu harus berupa waktu mendatang.");
+  }
+
+  const tableId = readOptionalString(body.tableId, "tableId", 120);
+  if (orderType === "dine_in" && !tableId) {
+    throw new OrderValidationError("tableId wajib untuk pesanan makan di tempat.");
+  }
+  if (orderType === "advance" && tableId) {
+    throw new OrderValidationError("Pesan dulu tidak menggunakan meja dine-in.");
+  }
+
   return {
+    orderType: orderType as "dine_in" | "advance",
     outletId: readRequiredString(body.outletId, "outletId"),
-    tableId: readRequiredString(body.tableId, "tableId"),
+    tableId,
     paymentMethod: paymentMethod as (typeof orderPaymentMethods)[number],
     items,
     notes: readOptionalString(body.notes, "Catatan pesanan", 500),
+    scheduledAt: parsedScheduledAt,
   };
 }
 
@@ -116,15 +141,41 @@ export async function POST(request: NextRequest) {
 
   try {
     const input = parseCreateOrderBody(body);
-    const order = await createDineInOrder(input);
+    if (input.orderType === "advance") {
+      const session = await requireMember(request);
+      if (!session) {
+        return NextResponse.json(
+          { success: false, error: "Login member diperlukan untuk pesan dulu." },
+          { status: 401 },
+        );
+      }
+
+      const order = await createAdvanceOrder({
+        outletId: input.outletId,
+        paymentMethod: input.paymentMethod,
+        items: input.items,
+        notes: input.notes,
+        scheduledAt: input.scheduledAt!,
+        userId: session.user.id,
+      });
+
+      return NextResponse.json({ success: true, data: order }, { status: 201 });
+    }
+
+    const order = await createDineInOrder({
+      outletId: input.outletId,
+      tableId: input.tableId!,
+      paymentMethod: input.paymentMethod,
+      items: input.items,
+      notes: input.notes,
+    });
 
     return NextResponse.json({ success: true, data: order }, { status: 201 });
   } catch (error) {
     if (error instanceof OrderValidationError) {
-      const status = error.message.includes("login member") ? 401 : 400;
       return NextResponse.json(
         { success: false, error: error.message },
-        { status },
+        { status: 400 },
       );
     }
 
