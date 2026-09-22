@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { and, eq, notInArray } from "drizzle-orm";
+import { and, asc, desc, eq, notInArray } from "drizzle-orm";
 
 import {
   mockReservationOutlets,
@@ -24,6 +24,33 @@ export type CreateMemberReservationInput = {
 };
 
 export class ReservationValidationError extends Error {}
+
+export async function listMemberReservations(userId: string) {
+  const rows = await db
+    .select({
+      id: reservations.id,
+      outletId: reservations.outletId,
+      tableTypeId: reservations.tableTypeId,
+      arrivalDate: reservations.arrivalDate,
+      arrivalTime: reservations.arrivalTime,
+      guestCount: reservations.guestCount,
+      status: reservations.status,
+      notes: reservations.notes,
+      createdAt: reservations.createdAt,
+      updatedAt: reservations.updatedAt,
+    })
+    .from(reservations)
+    .where(eq(reservations.userId, userId))
+    .orderBy(desc(reservations.arrivalDate), desc(reservations.arrivalTime), asc(reservations.id));
+
+  return rows.map((reservation) => ({
+    ...reservation,
+    outlet: mockReservationOutlets.find((outlet) => outlet.id === reservation.outletId) ?? null,
+    tableType:
+      reservationTableTypes.find((tableType) => tableType.id === reservation.tableTypeId) ??
+      null,
+  }));
+}
 
 export async function getReservationAvailability(input: {
   outletId: string;

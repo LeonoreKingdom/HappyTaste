@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import {
   createMemberReservation,
+  listMemberReservations,
   ReservationValidationError,
   reservationTableTypes,
   reservationTimeSlots,
@@ -123,6 +124,27 @@ export async function POST(request: NextRequest) {
     console.error("Error creating reservation:", error);
     return NextResponse.json(
       { success: false, error: "Reservasi tidak dapat dibuat." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function GET(request: NextRequest) {
+  const session = await requireMember(request);
+  if (!session) {
+    return NextResponse.json(
+      { success: false, error: "Login member diperlukan untuk melihat reservasi." },
+      { status: 401 },
+    );
+  }
+
+  try {
+    const reservations = await listMemberReservations(session.user.id);
+    return NextResponse.json({ success: true, data: reservations });
+  } catch (error) {
+    console.error("Error listing member reservations:", error);
+    return NextResponse.json(
+      { success: false, error: "Daftar reservasi tidak dapat dimuat." },
       { status: 500 },
     );
   }
