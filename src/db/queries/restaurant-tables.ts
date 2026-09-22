@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { restaurantTables, type RestaurantTable } from "@/db/schema";
@@ -35,6 +35,21 @@ export async function findRestaurantTableByQrCode(
     .select()
     .from(restaurantTables)
     .where(eq(restaurantTables.qrCode, normalizedQrCode))
+    .limit(1);
+
+  return table ? toPublicRestaurantTable(table) : null;
+}
+
+export async function findRestaurantTableById(
+  id: string,
+  outletId: string,
+): Promise<PublicRestaurantTable | null> {
+  const [table] = await db
+    .select()
+    .from(restaurantTables)
+    .where(
+      and(eq(restaurantTables.id, id), eq(restaurantTables.outletId, outletId)),
+    )
     .limit(1);
 
   return table ? toPublicRestaurantTable(table) : null;

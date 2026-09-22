@@ -19,6 +19,7 @@ export const orderStatuses = [
   "cancelled",
 ] as const;
 export const orderPaymentMethods = ["cash", "card", "qris"] as const;
+export type OrderPaymentMethod = (typeof orderPaymentMethods)[number];
 
 export const orders = sqliteTable(
   "orders",
