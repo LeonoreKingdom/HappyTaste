@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { inArray } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
@@ -55,6 +55,44 @@ export async function createAdvanceOrder(input: CreateAdvanceOrderInput) {
     userId: input.userId,
     scheduledAt: input.scheduledAt,
   });
+}
+
+export async function findMemberOrderById(orderId: string, userId: string) {
+  const [order] = await db
+    .select({
+      id: orders.id,
+      outletId: orders.outletId,
+      tableId: orders.tableId,
+      orderType: orders.orderType,
+      status: orders.status,
+      paymentMethod: orders.paymentMethod,
+      total: orders.total,
+      notes: orders.notes,
+      scheduledAt: orders.scheduledAt,
+      createdAt: orders.createdAt,
+    })
+    .from(orders)
+    .where(and(eq(orders.id, orderId), eq(orders.userId, userId)))
+    .limit(1);
+
+  if (!order) return null;
+
+  const items = await db
+    .select({
+      id: orderItems.id,
+      menuId: orderItems.menuId,
+      menuName: menus.name,
+      quantity: orderItems.quantity,
+      price: orderItems.price,
+      subtotal: orderItems.subtotal,
+      notes: orderItems.notes,
+    })
+    .from(orderItems)
+    .innerJoin(menus, eq(orderItems.menuId, menus.id))
+    .where(eq(orderItems.orderId, orderId))
+    .orderBy(asc(orderItems.id));
+
+  return { ...order, items };
 }
 
 async function createOrder(input: {
