@@ -12,6 +12,8 @@
     "db:seed": "tsx src/db/seed.ts"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.7.5",
+    "better-auth": "^1.7.5",
     "better-sqlite3": "^13.0.3",
     "drizzle-orm": "^0.45.2",
     "lucide-react": "^0.475.0",
@@ -28,8 +30,8 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
-    "tsx": "^4.23.13",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5"
   }
 }
