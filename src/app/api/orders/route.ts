@@ -46,6 +46,14 @@ function readOptionalString(
   return value.trim() || undefined;
 }
 
+function isAdvanceOrderBody(body: unknown) {
+  return (
+    isRecord(body) &&
+    typeof body.orderType === "string" &&
+    body.orderType.trim() === "advance"
+  );
+}
+
 function parseCreateOrderBody(body: unknown) {
   if (!isRecord(body)) {
     throw new OrderValidationError("Body pesanan tidak valid.");
@@ -140,10 +148,19 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const memberSession = isAdvanceOrderBody(body)
+      ? await requireMember(request)
+      : null;
+    if (isAdvanceOrderBody(body) && !memberSession) {
+      return NextResponse.json(
+        { success: false, error: "Login member diperlukan untuk pesan dulu." },
+        { status: 401 },
+      );
+    }
+
     const input = parseCreateOrderBody(body);
     if (input.orderType === "advance") {
-      const session = await requireMember(request);
-      if (!session) {
+      if (!memberSession) {
         return NextResponse.json(
           { success: false, error: "Login member diperlukan untuk pesan dulu." },
           { status: 401 },
@@ -156,7 +173,7 @@ export async function POST(request: NextRequest) {
         items: input.items,
         notes: input.notes,
         scheduledAt: input.scheduledAt!,
-        userId: session.user.id,
+        userId: memberSession.user.id,
       });
 
       return NextResponse.json({ success: true, data: order }, { status: 201 });
