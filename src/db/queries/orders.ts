@@ -28,6 +28,30 @@ export type CreateAdvanceOrderInput = Omit<CreateDineInOrderInput, "tableId"> & 
   scheduledAt: Date;
 };
 
+export const orderPaymentMethodOptions = [
+  {
+    id: "cash",
+    label: "Tunai di kasir",
+    description: "Bayar langsung di outlet setelah pesanan siap.",
+  },
+  {
+    id: "card",
+    label: "Kartu di kasir",
+    description:
+      "Pilih kartu debit atau kredit saat di outlet; detail kartu tidak diminta di sini.",
+  },
+  {
+    id: "qris",
+    label: "QRIS",
+    description:
+      "Metode ini hanya dipilih di simulasi; tidak ada QR pembayaran yang dibuat.",
+  },
+] as const satisfies ReadonlyArray<{
+  id: OrderPaymentMethod;
+  label: string;
+  description: string;
+}>;
+
 export class OrderValidationError extends Error {}
 
 export async function createDineInOrder(input: CreateDineInOrderInput) {
