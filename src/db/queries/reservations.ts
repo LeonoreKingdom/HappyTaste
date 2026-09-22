@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { and, asc, desc, eq, notInArray } from "drizzle-orm";
+import { and, asc, desc, eq, ne, notInArray } from "drizzle-orm";
 
 import {
   mockReservationOutlets,
@@ -56,6 +56,7 @@ export async function getReservationAvailability(input: {
   outletId: string;
   arrivalDate: string;
   guestCount: number;
+  excludeReservationId?: string;
 }) {
   const outlet = mockReservationOutlets.find((item) => item.id === input.outletId);
   if (!outlet) return null;
@@ -71,6 +72,9 @@ export async function getReservationAvailability(input: {
         eq(reservations.outletId, input.outletId),
         eq(reservations.arrivalDate, input.arrivalDate),
         notInArray(reservations.status, ["cancelled", "completed"]),
+        input.excludeReservationId
+          ? ne(reservations.id, input.excludeReservationId)
+          : undefined,
       ),
     );
 
@@ -106,6 +110,30 @@ export async function getReservationAvailability(input: {
     tableTypes: matchingTableTypes,
     timeSlots,
   };
+}
+
+export async function findMemberReservationById(
+  reservationId: string,
+  userId: string,
+) {
+  const [reservation] = await db
+    .select({
+      id: reservations.id,
+      outletId: reservations.outletId,
+      tableTypeId: reservations.tableTypeId,
+      arrivalDate: reservations.arrivalDate,
+      arrivalTime: reservations.arrivalTime,
+      guestCount: reservations.guestCount,
+      status: reservations.status,
+      notes: reservations.notes,
+      createdAt: reservations.createdAt,
+      updatedAt: reservations.updatedAt,
+    })
+    .from(reservations)
+    .where(and(eq(reservations.id, reservationId), eq(reservations.userId, userId)))
+    .limit(1);
+
+  return reservation ?? null;
 }
 
 export async function createMemberReservation(input: CreateMemberReservationInput) {
@@ -150,5 +178,66 @@ export async function createMemberReservation(input: CreateMemberReservationInpu
     guestCount: input.guestCount,
     status: "pending" as const,
     notes: input.notes ?? null,
+  };
+}
+
+export async function updateMemberReservation(input: {
+  reservationId: string;
+  userId: string;
+  outletId: string;
+  tableTypeId: string;
+  arrivalDate: string;
+  arrivalTime: string;
+  guestCount: number;
+}) {
+  const existing = await findMemberReservationById(input.reservationId, input.userId);
+  if (!existing) return null;
+  if (existing.status !== "pending" && existing.status !== "confirmed") {
+    throw new ReservationValidationError(
+      "Reservasi dengan status ini tidak dapat diubah.",
+    );
+  }
+
+  const availability = await getReservationAvailability({
+    outletId: input.outletId,
+    arrivalDate: input.arrivalDate,
+    guestCount: input.guestCount,
+    excludeReservationId: input.reservationId,
+  });
+  if (!availability) {
+    throw new ReservationValidationError("Outlet tidak ditemukan.");
+  }
+
+  const slot = availability.timeSlots.find((item) => item.time === input.arrivalTime);
+  if (!slot || !slot.tableTypes.some((item) => item.id === input.tableTypeId)) {
+    throw new ReservationValidationError(
+      "Tipe meja tidak sesuai dengan jumlah tamu atau slot tidak tersedia.",
+    );
+  }
+
+  const updatedAt = new Date();
+  db.update(reservations)
+    .set({
+      tableTypeId: input.tableTypeId,
+      arrivalDate: input.arrivalDate,
+      arrivalTime: input.arrivalTime,
+      guestCount: input.guestCount,
+      updatedAt,
+    })
+    .where(
+      and(
+        eq(reservations.id, input.reservationId),
+        eq(reservations.userId, input.userId),
+      ),
+    )
+    .run();
+
+  return {
+    ...existing,
+    tableTypeId: input.tableTypeId,
+    arrivalDate: input.arrivalDate,
+    arrivalTime: input.arrivalTime,
+    guestCount: input.guestCount,
+    updatedAt,
   };
 }
