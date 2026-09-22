@@ -22,6 +22,13 @@
       "when": 1790020160418,
       "tag": "0002_early_mauler",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1790065881604,
+      "tag": "0003_gigantic_joystick",
+      "breakpoints": true
     }
   ]
 }

@@ -1,7 +1,8 @@
 import { menuCategories as frontendCategories, mockMenus } from "@/data/mock-menu";
 import { mockBanners, mockPromos } from "@/data/mock-promos";
+import { mockTables } from "@/data/mock-tables";
 import { db } from "./index";
-import { banners, menuCategories, menus, promos } from "./schema";
+import { banners, menuCategories, menus, promos, restaurantTables } from "./schema";
 
 const categoryIds = {
   "Makanan Utama": "makanan-utama",
@@ -60,13 +61,24 @@ const bannerRows = mockBanners.map((banner) => ({
   promoId: banner.promoId,
 }));
 
+const tableRows = mockTables.map((table, index) => ({
+  id: table.id,
+  outletId: "happy-taste-demo",
+  tableNumber: table.label.replace("Meja ", ""),
+  capacity: index === 2 ? 6 : 4,
+  type: index === 2 ? ("vip" as const) : ("regular" as const),
+  qrCode: table.qrValue,
+  status: "available" as const,
+}));
+
 db.transaction((tx) => {
   tx.insert(menuCategories).values(categoryRows).onConflictDoNothing().run();
   tx.insert(menus).values(menuRows).onConflictDoNothing().run();
   tx.insert(promos).values(promoRows).onConflictDoNothing().run();
   tx.insert(banners).values(bannerRows).onConflictDoNothing().run();
+  tx.insert(restaurantTables).values(tableRows).onConflictDoNothing().run();
 });
 
 console.log(
-  `Seed siap: ${categoryRows.length} kategori, ${menuRows.length} menu, ${promoRows.length} promo, ${bannerRows.length} banner.`,
+  `Seed siap: ${categoryRows.length} kategori, ${menuRows.length} menu, ${promoRows.length} promo, ${bannerRows.length} banner, ${tableRows.length} meja.`,
 );

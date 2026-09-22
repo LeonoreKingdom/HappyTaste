@@ -1,3 +1,4 @@
 export * from "./promos";
 export * from "./menus";
 export * from "./orders";
+export * from "./restaurant-tables";
