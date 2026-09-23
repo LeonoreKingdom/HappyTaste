@@ -8,6 +8,13 @@ import {
   text,
 } from "drizzle-orm/sqlite-core";
 
+export type OutletOpeningHours = {
+  daysLabel: string;
+  opensAt: string;
+  closesAt: string;
+  timeZone: string;
+};
+
 export const outlets = sqliteTable(
   "outlets",
   {
@@ -18,7 +25,11 @@ export const outlets = sqliteTable(
     phone: text("phone"),
     whatsapp: text("whatsapp"),
     email: text("email"),
-    openingHours: text("opening_hours"),
+    openingHours: text("opening_hours", { mode: "json" }).$type<OutletOpeningHours>(),
+    facilities: text("facilities", { mode: "json" })
+      .$type<string[]>()
+      .notNull()
+      .default(sql`'[]'`),
     latitude: real("latitude"),
     longitude: real("longitude"),
     isDemoLocation: integer("is_demo_location", { mode: "boolean" })

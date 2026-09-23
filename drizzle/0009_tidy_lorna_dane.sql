@@ -1,0 +1,1 @@
+ALTER TABLE `outlets` ADD `facilities` text DEFAULT '[]' NOT NULL;
