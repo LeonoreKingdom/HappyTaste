@@ -39,9 +39,13 @@ export default async function MemberLoyaltyPage() {
   }
 
   const displayName = session.user.name.trim() || "Member HappyTaste";
+  const points = Math.max(0, mockLoyaltyOverview.points);
+  const hasPoints = points > 0;
+  const hasRewards = mockLoyaltyRewards.length > 0;
+  const hasActivities = mockLoyaltyActivities.length > 0;
   const progressPercent = Math.min(
     100,
-    Math.round((mockLoyaltyOverview.points / mockLoyaltyOverview.nextTierThreshold) * 100),
+    Math.round((points / mockLoyaltyOverview.nextTierThreshold) * 100),
   );
 
   return (
@@ -73,11 +77,19 @@ export default async function MemberLoyaltyPage() {
               <Sparkles aria-hidden="true" className="h-4 w-4" /> Saldo poin contoh
             </p>
             <h2 id="loyalty-balance-heading" className="mt-5 text-4xl font-bold tracking-tight sm:text-5xl">
-              {pointsFormatter.format(mockLoyaltyOverview.points)}
-              <span className="ml-2 text-xl font-semibold text-violet-100">poin demo</span>
+              {hasPoints ? (
+                <>
+                  {pointsFormatter.format(points)}
+                  <span className="ml-2 text-xl font-semibold text-violet-100">poin demo</span>
+                </>
+              ) : (
+                <span className="text-2xl font-semibold">Belum ada poin</span>
+              )}
             </h2>
             <p className="mt-3 text-sm leading-6 text-violet-100">
-              Angka ini hanya untuk preview dan bukan saldo milik akun yang sedang login.
+              {hasPoints
+                ? "Angka ini hanya untuk preview dan bukan saldo milik akun yang sedang login."
+                : "Saldo demo belum tersedia. Tidak ada poin dari transaksi akun ini yang dihitung."}
             </p>
           </div>
 
@@ -87,7 +99,9 @@ export default async function MemberLoyaltyPage() {
                 <p className="text-xs font-semibold uppercase tracking-wide text-violet-100">
                   Level sekarang · contoh
                 </p>
-                <p className="mt-1 text-lg font-bold">{mockLoyaltyOverview.tier}</p>
+                <p className="mt-1 text-lg font-bold">
+                  {hasPoints ? mockLoyaltyOverview.tier : "Belum ada level"}
+                </p>
               </div>
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15">
                 <Award aria-hidden="true" className="h-6 w-6" />
@@ -101,7 +115,7 @@ export default async function MemberLoyaltyPage() {
               aria-label="Progres menuju level loyalty contoh berikutnya"
               aria-valuemin={0}
               aria-valuemax={mockLoyaltyOverview.nextTierThreshold}
-              aria-valuenow={mockLoyaltyOverview.points}
+              aria-valuenow={points}
               className="mt-2 h-2.5 overflow-hidden rounded-full bg-black/20"
             >
               <div
@@ -110,7 +124,7 @@ export default async function MemberLoyaltyPage() {
               />
             </div>
             <p className="mt-2 text-right text-xs font-semibold text-white">
-              {pointsFormatter.format(mockLoyaltyOverview.points)} / {pointsFormatter.format(mockLoyaltyOverview.nextTierThreshold)} poin · {progressPercent}%
+              {pointsFormatter.format(points)} / {pointsFormatter.format(mockLoyaltyOverview.nextTierThreshold)} poin · {progressPercent}%
             </p>
           </div>
         </div>
@@ -128,31 +142,44 @@ export default async function MemberLoyaltyPage() {
             </p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            {mockLoyaltyRewards.map((reward) => (
-              <article
-                key={reward.id}
-                className="rounded-2xl border border-violet-100 bg-white p-5 shadow-sm"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-700">
-                    <Gift aria-hidden="true" className="h-5 w-5" />
-                  </span>
-                  <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-stone-600">
-                    Demo
-                  </span>
-                </div>
-                <h3 className="mt-4 text-lg font-bold text-stone-900">{reward.name}</h3>
-                <p className="mt-2 min-h-10 text-sm leading-5 text-stone-600">
-                  {reward.description}
-                </p>
-                <p className="mt-4 inline-flex items-center gap-2 rounded-lg bg-violet-50 px-3 py-2 text-sm font-bold text-violet-900">
-                  <Sparkles aria-hidden="true" className="h-4 w-4" />
-                  {pointsFormatter.format(reward.pointsRequired)} poin contoh
-                </p>
-              </article>
-            ))}
-          </div>
+          {hasRewards ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {mockLoyaltyRewards.map((reward) => (
+                <article
+                  key={reward.id}
+                  className="rounded-2xl border border-violet-100 bg-white p-5 shadow-sm"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-700">
+                      <Gift aria-hidden="true" className="h-5 w-5" />
+                    </span>
+                    <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-stone-600">
+                      Demo
+                    </span>
+                  </div>
+                  <h3 className="mt-4 text-lg font-bold text-stone-900">{reward.name}</h3>
+                  <p className="mt-2 min-h-10 text-sm leading-5 text-stone-600">
+                    {reward.description}
+                  </p>
+                  <p className="mt-4 inline-flex items-center gap-2 rounded-lg bg-violet-50 px-3 py-2 text-sm font-bold text-violet-900">
+                    <Sparkles aria-hidden="true" className="h-4 w-4" />
+                    {pointsFormatter.format(reward.pointsRequired)} poin contoh
+                  </p>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div
+              role="status"
+              className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/70 p-6 text-center sm:p-8"
+            >
+              <Gift aria-hidden="true" className="mx-auto h-8 w-8 text-violet-700" />
+              <h3 className="mt-3 font-semibold text-stone-900">Belum ada hadiah contoh</h3>
+              <p className="mt-1 text-sm leading-6 text-stone-600">
+                Katalog hadiah demo akan muncul di sini setelah tersedia.
+              </p>
+            </div>
+          )}
         </section>
 
         <section
@@ -171,25 +198,40 @@ export default async function MemberLoyaltyPage() {
             </span>
           </div>
 
-          <ol className="mt-5 divide-y divide-orange-100">
-            {mockLoyaltyActivities.map((activity) => (
-              <li key={activity.id} className="flex items-start gap-3 py-4 first:pt-0 last:pb-0">
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
-                  <CalendarDays aria-hidden="true" className="h-4 w-4" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-stone-900">{activity.title}</p>
-                  <p className="mt-1 text-xs text-stone-500">{activity.description}</p>
-                  <time className="mt-1 block text-xs text-stone-500" dateTime={activity.date}>
-                    {activityDateFormatter.format(new Date(`${activity.date}T00:00:00.000Z`))}
-                  </time>
-                </div>
-                <span className="shrink-0 text-sm font-bold text-emerald-800">
-                  +{pointsFormatter.format(activity.points)}
-                </span>
-              </li>
-            ))}
-          </ol>
+          {hasActivities ? (
+            <ol className="mt-5 divide-y divide-orange-100">
+              {mockLoyaltyActivities.map((activity) => (
+                <li key={activity.id} className="flex items-start gap-3 py-4 first:pt-0 last:pb-0">
+                  <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+                    <CalendarDays aria-hidden="true" className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-stone-900">{activity.title}</p>
+                    <p className="mt-1 text-xs text-stone-500">{activity.description}</p>
+                    <time className="mt-1 block text-xs text-stone-500" dateTime={activity.date}>
+                      {activityDateFormatter.format(new Date(`${activity.date}T00:00:00.000Z`))}
+                    </time>
+                  </div>
+                  <span className="shrink-0 text-sm font-bold text-emerald-800">
+                    +{pointsFormatter.format(activity.points)}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div
+              role="status"
+              className="mt-5 rounded-xl border border-dashed border-orange-200 bg-orange-50/70 p-5 text-center"
+            >
+              <CalendarDays aria-hidden="true" className="mx-auto h-7 w-7 text-orange-700" />
+              <h3 className="mt-3 text-sm font-semibold text-stone-900">
+                Belum ada aktivitas poin
+              </h3>
+              <p className="mt-1 text-xs leading-5 text-stone-600">
+                Riwayat contoh akan ditampilkan di sini saat tersedia.
+              </p>
+            </div>
+          )}
         </section>
       </div>
 
