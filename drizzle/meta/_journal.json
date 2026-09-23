@@ -78,6 +78,13 @@
       "when": 1790151369727,
       "tag": "0010_exotic_anthem",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1790181120673,
+      "tag": "0011_thin_kat_farrell",
+      "breakpoints": true
     }
   ]
 }

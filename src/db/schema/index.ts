@@ -6,3 +6,4 @@ export * from "./auth";
 export * from "./member-profiles";
 export * from "./reservations";
 export * from "./outlets";
+export * from "./loyalty-transactions";
