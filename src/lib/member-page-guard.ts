@@ -36,5 +36,9 @@ export async function requireMemberPage(returnTo: string) {
     redirect(`/akun/masuk?next=${encodeURIComponent(safePath)}`);
   }
 
+  if (session.user.role !== "user") {
+    redirect("/");
+  }
+
   return session;
 }
