@@ -24,17 +24,27 @@ export const mockLoyaltyRewards = [
 
 export const mockLoyaltyActivities = [
   {
-    id: "welcome-preview",
-    date: "2026-09-20",
-    title: "Bonus sambutan demo",
-    description: "Contoh perolehan poin pembuka",
-    points: 50,
+    id: "reward-preview-redemption",
+    date: "2026-09-23",
+    title: "Contoh penukaran poin",
+    description: "Riwayat simulasi; tidak ada hadiah yang benar-benar ditukar.",
+    type: "redeem",
+    points: 30,
   },
   {
     id: "visit-preview",
     date: "2026-09-22",
     title: "Kunjungan demo",
     description: "Aktivitas transaksi contoh",
-    points: 70,
+    type: "earn",
+    points: 100,
+  },
+  {
+    id: "welcome-preview",
+    date: "2026-09-20",
+    title: "Bonus sambutan demo",
+    description: "Contoh perolehan poin pembuka",
+    type: "earn",
+    points: 50,
   },
 ] as const;

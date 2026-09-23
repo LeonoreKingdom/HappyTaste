@@ -207,23 +207,45 @@ export default async function MemberLoyaltyPage() {
 
           {hasActivities ? (
             <ol className="mt-5 divide-y divide-orange-100">
-              {mockLoyaltyActivities.map((activity) => (
-                <li key={activity.id} className="flex items-start gap-3 py-4 first:pt-0 last:pb-0">
-                  <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
-                    <CalendarDays aria-hidden="true" className="h-4 w-4" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-stone-900">{activity.title}</p>
-                    <p className="mt-1 text-xs text-stone-500">{activity.description}</p>
-                    <time className="mt-1 block text-xs text-stone-500" dateTime={activity.date}>
-                      {activityDateFormatter.format(new Date(`${activity.date}T00:00:00.000Z`))}
-                    </time>
-                  </div>
-                  <span className="shrink-0 text-sm font-bold text-emerald-800">
-                    +{pointsFormatter.format(activity.points)}
-                  </span>
-                </li>
-              ))}
+              {mockLoyaltyActivities.map((activity) => {
+                const isEarn = activity.type === "earn";
+
+                return (
+                  <li key={activity.id} className="flex items-start gap-3 py-4 first:pt-0 last:pb-0">
+                    <span
+                      className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                        isEarn ? "bg-emerald-50 text-emerald-700" : "bg-orange-50 text-orange-700"
+                      }`}
+                    >
+                      <CalendarDays aria-hidden="true" className="h-4 w-4" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-stone-900">{activity.title}</p>
+                      <span
+                        className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                          isEarn
+                            ? "bg-emerald-50 text-emerald-800"
+                            : "bg-orange-50 text-orange-900"
+                        }`}
+                      >
+                        {isEarn ? "Poin masuk · demo" : "Poin keluar · demo"}
+                      </span>
+                      <p className="mt-1 text-xs text-stone-500">{activity.description}</p>
+                      <time className="mt-1 block text-xs text-stone-500" dateTime={activity.date}>
+                        {activityDateFormatter.format(new Date(`${activity.date}T00:00:00.000Z`))}
+                      </time>
+                    </div>
+                    <span
+                      className={`shrink-0 text-sm font-bold ${
+                        isEarn ? "text-emerald-800" : "text-orange-900"
+                      }`}
+                    >
+                      {isEarn ? "+" : "−"}
+                      {pointsFormatter.format(activity.points)}
+                    </span>
+                  </li>
+                );
+              })}
             </ol>
           ) : (
             <div
