@@ -72,18 +72,42 @@ export function AccountSessionControl() {
 
   return (
     <div className="relative flex items-center gap-1">
-      <span
-        title={displayName}
-        className="max-w-28 truncate text-xs font-medium text-stone-700 lg:max-w-40 lg:text-sm"
-      >
-        <span className="hidden lg:inline">{displayName}</span>
-      </span>
-      <span
-        aria-label={`Status akun: ${accountLabel}`}
-        className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold leading-none text-emerald-800 ring-1 ring-inset ring-emerald-200 sm:text-xs"
-      >
-        {accountLabel}
-      </span>
+      {session.user.role === "user" ? (
+        <Link
+          href="/akun/profil"
+          aria-label="Buka Profil Saya"
+          title="Profil Saya"
+          className="inline-flex items-center gap-1 rounded-lg px-1 py-1 transition hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+        >
+          <span
+            title={displayName}
+            className="max-w-28 truncate text-xs font-medium text-stone-700 lg:max-w-40 lg:text-sm"
+          >
+            <span className="hidden lg:inline">{displayName}</span>
+          </span>
+          <span
+            aria-label={`Status akun: ${accountLabel}`}
+            className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold leading-none text-emerald-800 ring-1 ring-inset ring-emerald-200 sm:text-xs"
+          >
+            {accountLabel}
+          </span>
+        </Link>
+      ) : (
+        <>
+          <span
+            title={displayName}
+            className="max-w-28 truncate text-xs font-medium text-stone-700 lg:max-w-40 lg:text-sm"
+          >
+            <span className="hidden lg:inline">{displayName}</span>
+          </span>
+          <span
+            aria-label={`Status akun: ${accountLabel}`}
+            className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold leading-none text-emerald-800 ring-1 ring-inset ring-emerald-200 sm:text-xs"
+          >
+            {accountLabel}
+          </span>
+        </>
+      )}
       <button
         type="button"
         onClick={handleSignOut}
