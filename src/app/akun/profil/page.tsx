@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { ArrowLeft, BadgeCheck, CalendarDays, Gift, Info, Mail, Sparkles, Utensils } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Bell, CalendarDays, Gift, Info, Mail, Sparkles, Utensils } from "lucide-react";
 import Link from "next/link";
 
+import { mockLoyaltyActivities } from "@/data/mock-loyalty";
 import { mockMemberProfile } from "@/data/mock-member-profile";
 import { getCurrentSession } from "@/lib/auth-session";
 
@@ -18,6 +19,8 @@ function formatDate(date: Date) {
     timeZone: "Asia/Jakarta",
   }).format(date);
 }
+
+const pointsFormatter = new Intl.NumberFormat("id-ID");
 
 export default async function MemberProfilePage() {
   const session = await getCurrentSession(await headers());
@@ -36,6 +39,7 @@ export default async function MemberProfilePage() {
     .slice(0, 2)
     .map((part) => part[0]?.toLocaleUpperCase("id-ID") ?? "")
     .join("");
+  const latestEarnedActivity = mockLoyaltyActivities.find((activity) => activity.type === "earn");
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-8 px-5 py-8 sm:px-8 sm:py-12">
@@ -55,6 +59,45 @@ export default async function MemberProfilePage() {
           Informasi akun ditampilkan dari sesi member yang sedang aktif.
         </p>
       </header>
+
+      {latestEarnedActivity ? (
+        <aside
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="flex flex-col gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5"
+        >
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-800">
+              <Bell aria-hidden="true" className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-emerald-800">
+                Notifikasi poin · Demo
+              </p>
+              <p className="mt-1 font-semibold text-emerald-950">
+                +{pointsFormatter.format(latestEarnedActivity.points)} poin contoh bertambah dari{" "}
+                {latestEarnedActivity.title}.
+              </p>
+              <p className="mt-1 text-sm leading-5 text-emerald-900">
+                Ini notifikasi pratinjau; saldo akun dan transaksi nyata tidak berubah.
+              </p>
+              <time
+                className="mt-1 block text-xs text-emerald-800"
+                dateTime={latestEarnedActivity.date}
+              >
+                {formatDate(new Date(`${latestEarnedActivity.date}T00:00:00.000Z`))}
+              </time>
+            </div>
+          </div>
+          <Link
+            href="/loyalty#loyalty-activity-heading"
+            className="inline-flex w-fit items-center justify-center rounded-xl border border-emerald-300 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200"
+          >
+            Lihat riwayat poin demo
+          </Link>
+        </aside>
+      ) : null}
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <section
