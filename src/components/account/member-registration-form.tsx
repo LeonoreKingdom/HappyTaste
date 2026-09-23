@@ -185,6 +185,15 @@ export function MemberRegistrationForm() {
               Tampilkan preview pendaftaran
             </button>
           </form>
+          <p className="mt-6 border-t border-orange-100 pt-5 text-sm text-stone-600">
+            Sudah memiliki akun?{" "}
+            <Link
+              href="/akun/masuk"
+              className="font-semibold text-orange-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+            >
+              Masuk
+            </Link>
+          </p>
         </section>
 
         <aside className="space-y-5 lg:sticky lg:top-24">
