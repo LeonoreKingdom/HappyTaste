@@ -9,6 +9,7 @@ import {
 } from "@/data/mock-reservations";
 import { db } from "@/db";
 import { reservations } from "@/db/schema";
+import { user as authUser } from "@/db/schema/auth";
 
 export const reservationTimeSlots = mockReservationTimeSlots;
 export const reservationTableTypes = mockReservationTableTypes;
@@ -45,6 +46,37 @@ export async function listMemberReservations(userId: string) {
 
   return rows.map((reservation) => ({
     ...reservation,
+    outlet: mockReservationOutlets.find((outlet) => outlet.id === reservation.outletId) ?? null,
+    tableType:
+      reservationTableTypes.find((tableType) => tableType.id === reservation.tableTypeId) ??
+      null,
+  }));
+}
+
+export async function listManagementReservations() {
+  const rows = await db
+    .select({
+      id: reservations.id,
+      outletId: reservations.outletId,
+      tableTypeId: reservations.tableTypeId,
+      arrivalDate: reservations.arrivalDate,
+      arrivalTime: reservations.arrivalTime,
+      guestCount: reservations.guestCount,
+      status: reservations.status,
+      notes: reservations.notes,
+      createdAt: reservations.createdAt,
+      updatedAt: reservations.updatedAt,
+      memberId: authUser.id,
+      memberName: authUser.name,
+      memberEmail: authUser.email,
+    })
+    .from(reservations)
+    .innerJoin(authUser, eq(reservations.userId, authUser.id))
+    .orderBy(asc(reservations.arrivalDate), asc(reservations.arrivalTime), asc(reservations.id));
+
+  return rows.map(({ memberId, memberName, memberEmail, ...reservation }) => ({
+    ...reservation,
+    member: { id: memberId, name: memberName, email: memberEmail },
     outlet: mockReservationOutlets.find((outlet) => outlet.id === reservation.outletId) ?? null,
     tableType:
       reservationTableTypes.find((tableType) => tableType.id === reservation.tableTypeId) ??
