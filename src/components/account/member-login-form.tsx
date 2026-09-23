@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { ArrowLeft, Check, Info, LoaderCircle, LockKeyhole } from "lucide-react";
 
 import { signIn } from "@/lib/auth-client";
 
 export function MemberLoginForm() {
+  const router = useRouter();
   const [formError, setFormError] = useState("");
   const [status, setStatus] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,6 +34,23 @@ export function MemberLoginForm() {
       }
 
       form.reset();
+
+      const nextPath = new URLSearchParams(window.location.search).get("next");
+      if (nextPath && nextPath.length <= 2048) {
+        try {
+          const destination = new URL(nextPath, window.location.origin);
+          if (
+            destination.origin === window.location.origin &&
+            destination.pathname !== "/akun/masuk"
+          ) {
+            router.replace(`${destination.pathname}${destination.search}${destination.hash}`);
+            return;
+          }
+        } catch {
+          // Ignore malformed return paths and keep the user on the login page.
+        }
+      }
+
       setStatus("Login berhasil. Sesi member sudah aktif.");
     } catch {
       setFormError("Layanan autentikasi belum dapat dijangkau. Coba lagi sebentar.");

@@ -156,7 +156,7 @@ export function OrderHome({
         </h1>
         <p className="mt-4 max-w-xl text-sm leading-6 text-orange-100 sm:text-base sm:leading-7">
           {isMemberAdvancePage
-            ? "Pilih menu favorit lebih awal. Fitur ini masih berupa preview dan belum memverifikasi akun member atau mengirim pesanan."
+            ? "Pilih menu favorit lebih awal. Sesi member diwajibkan untuk membuka alur ini; pilihan menu tetap preview dan pesanan tidak dikirim atau disimpan."
             : "Pilih cara pesan, temukan menu favorit, lalu susun pesananmu. Untuk saat ini, pilihan menu dan keranjang berjalan sebagai simulasi."}
         </p>
         <div className="mt-7 flex flex-wrap gap-3 text-xs font-medium text-orange-50 sm:text-sm">
@@ -277,7 +277,7 @@ export function OrderHome({
                   ? initialTable
                     ? `${initialTable.label} dipilih dari QR demo. Validasi meja server belum tersedia.`
                     : "Pemesanan di tempat memerlukan QR meja. Scan kode meja sebelum memilih menu."
-                  : "Pemesanan lebih dulu khusus member. Login dan pengiriman pesanan belum terhubung pada simulasi ini."}
+                  : "Pemesanan lebih dulu khusus member. Sesi login sudah diwajibkan; pesanan dalam simulasi ini belum dikirim atau disimpan."}
               </p>
               {selectedMode === "dine-in" && !initialTable ? (
                 <Link

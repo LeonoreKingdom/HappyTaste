@@ -7,6 +7,7 @@ import {
   mockReservationTableTypes,
   mockReservationTimeSlots,
 } from "@/data/mock-reservations";
+import { createMemberReturnPath, requireMemberPage } from "@/lib/member-page-guard";
 
 export const metadata: Metadata = {
   title: "Konfirmasi Reservasi Demo - HappyTaste Resto",
@@ -118,7 +119,10 @@ export default async function ReservationConfirmationPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const reservation = parseReservationSummary(await searchParams);
+  const params = await searchParams;
+  await requireMemberPage(createMemberReturnPath("/reservation/confirmation", params));
+
+  const reservation = parseReservationSummary(params);
 
   if (!reservation) {
     return <ConfirmationUnavailable />;

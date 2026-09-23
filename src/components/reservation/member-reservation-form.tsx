@@ -343,8 +343,8 @@ export function MemberReservationForm() {
                   Fitur khusus member
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-amber-900">
-                  Login member belum terhubung pada preview ini. Akun tidak diverifikasi,
-                  slot tidak menjamin ketersediaan, dan reservasi tidak dikirim atau disimpan.
+                  Sesi member diwajibkan untuk membuka halaman ini. Jadwal tetap berupa preview;
+                  slot belum diverifikasi, dan reservasi tidak dikirim atau disimpan.
                 </p>
               </div>
             </div>

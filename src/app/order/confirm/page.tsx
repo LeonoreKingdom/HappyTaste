@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { OrderConfirmationPage } from "@/components/order/order-confirmation-page";
 import { mockMenus } from "@/data/mock-menu";
 import { getMockTableById } from "@/data/mock-tables";
+import { createMemberReturnPath, requireMemberPage } from "@/lib/member-page-guard";
 
 export const metadata: Metadata = {
   title: "Konfirmasi Pesanan - HappyTaste Resto",
@@ -14,7 +15,13 @@ type ConfirmationPageProps = {
 };
 
 export default async function ConfirmationPage({ searchParams }: ConfirmationPageProps) {
-  const { mode, table } = await searchParams;
+  const params = await searchParams;
+  const { mode, table } = params;
+
+  if (mode === "advance") {
+    await requireMemberPage(createMemberReturnPath("/order/confirm", params));
+  }
+
   const selectedTable = typeof table === "string" ? getMockTableById(table) ?? null : null;
   const orderMode = selectedTable
     ? "dine-in"

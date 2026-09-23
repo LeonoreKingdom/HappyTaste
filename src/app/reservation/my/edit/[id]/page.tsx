@@ -8,6 +8,7 @@ import {
   mockReservationOutlets,
   mockReservationTableTypes,
 } from "@/data/mock-reservations";
+import { requireMemberPage } from "@/lib/member-page-guard";
 
 export const metadata: Metadata = {
   title: "Ubah Reservasi (Demo) - HappyTaste Resto",
@@ -48,6 +49,8 @@ export default async function EditReservationPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  await requireMemberPage(`/reservation/my/edit/${encodeURIComponent(id)}`);
+
   const reservation = mockMemberReservations.find(
     (item) =>
       item.id === id && (item.status === "confirmed" || item.status === "pending"),

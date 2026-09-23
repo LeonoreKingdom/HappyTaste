@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { OrderHome } from "@/components/order/order-home";
 import { mockMenus } from "@/data/mock-menu";
 import { getMockTableById } from "@/data/mock-tables";
+import { createMemberReturnPath, requireMemberPage } from "@/lib/member-page-guard";
 
 export const metadata: Metadata = {
   title: "Pesan Makanan - HappyTaste Resto",
@@ -14,7 +15,13 @@ type OrderPageProps = {
 };
 
 export default async function OrderPage({ searchParams }: OrderPageProps) {
-  const { mode, table } = await searchParams;
+  const params = await searchParams;
+  const { mode, table } = params;
+
+  if (mode === "advance") {
+    await requireMemberPage(createMemberReturnPath("/order", params));
+  }
+
   const initialTable = typeof table === "string" ? getMockTableById(table) ?? null : null;
   const initialMode = initialTable
     ? "dine-in"

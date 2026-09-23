@@ -191,7 +191,7 @@ export function OrderCartPage({ menus, orderMode, table }: OrderCartPageProps) {
                 </p>
                 <p className="mt-1 text-xs leading-5 text-stone-600">
                   {orderMode === "advance"
-                    ? "Login member dan pengiriman pesanan belum tersedia di simulasi ini."
+                    ? "Sesi member diwajibkan untuk pesan lebih dulu; keranjang tetap demo dan belum dikirim ke server."
                     : orderMode === "dine-in"
                       ? table
                         ? "Meja berasal dari kode demo dan belum diverifikasi server."

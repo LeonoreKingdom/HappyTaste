@@ -260,7 +260,7 @@ export function OrderConfirmationPage({
               </p>
               <p className="mt-2 text-xs leading-5 text-stone-600">
                 {orderMode === "advance"
-                  ? "Login member dan submit order belum terhubung."
+                  ? "Sesi member diwajibkan untuk pesan lebih dulu; konfirmasi ini tetap simulasi dan tidak membuat pesanan."
                   : orderMode === "dine-in"
                     ? table
                       ? "Meja demo belum diverifikasi server."

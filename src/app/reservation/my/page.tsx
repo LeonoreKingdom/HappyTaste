@@ -9,6 +9,7 @@ import {
   mockReservationOutlets,
   mockReservationTableTypes,
 } from "@/data/mock-reservations";
+import { requireMemberPage } from "@/lib/member-page-guard";
 
 export const metadata: Metadata = {
   title: "Reservasi Saya (Demo) - HappyTaste Resto",
@@ -23,7 +24,9 @@ const dateFormatter = new Intl.DateTimeFormat("id-ID", {
   timeZone: "UTC",
 });
 
-export default function MyReservationsPage() {
+export default async function MyReservationsPage() {
+  await requireMemberPage("/reservation/my");
+
   return (
     <main className="mx-auto w-full max-w-5xl space-y-8 px-5 py-8 sm:px-8 sm:py-12">
       <Link
@@ -47,8 +50,8 @@ export default function MyReservationsPage() {
         role="note"
         className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-950"
       >
-        Akun member belum terhubung. Semua item di bawah adalah data tiruan; status tidak berasal
-        dari server dan tidak mewakili reservasi yang benar-benar dibuat.
+        Sesi member diwajibkan untuk membuka halaman ini. Semua item di bawah tetap data tiruan;
+        status bukan catatan akun atau reservasi yang benar-benar dibuat.
       </aside>
 
       <section aria-labelledby="my-reservations-title" className="space-y-4">

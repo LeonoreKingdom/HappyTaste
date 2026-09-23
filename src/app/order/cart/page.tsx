@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { OrderCartPage } from "@/components/order/order-cart-page";
 import { mockMenus } from "@/data/mock-menu";
 import { getMockTableById } from "@/data/mock-tables";
+import { createMemberReturnPath, requireMemberPage } from "@/lib/member-page-guard";
 
 export const metadata: Metadata = {
   title: "Keranjang Pesanan - HappyTaste Resto",
@@ -14,7 +15,13 @@ type CartPageProps = {
 };
 
 export default async function CartPage({ searchParams }: CartPageProps) {
-  const { mode, table } = await searchParams;
+  const params = await searchParams;
+  const { mode, table } = params;
+
+  if (mode === "advance") {
+    await requireMemberPage(createMemberReturnPath("/order/cart", params));
+  }
+
   const selectedTable = typeof table === "string" ? getMockTableById(table) ?? null : null;
   const orderMode = selectedTable
     ? "dine-in"
