@@ -9,6 +9,7 @@ import {
   Sparkles,
   Tag,
   Utensils,
+  UserRoundPlus,
 } from "lucide-react";
 
 import { MenuBrowser } from "@/components/menu/menu-browser";
@@ -197,13 +198,22 @@ export default function HomePage() {
             momen makanmu hari ini.
           </p>
         </div>
-        <Link
-          href="/menu"
-          className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-white px-6 py-3 text-sm font-bold text-orange-600 shadow-lg transition-transform hover:bg-orange-50 active:scale-95"
-        >
-          <Utensils className="h-4 w-4" />
-          <span>Lihat Menu</span>
-        </Link>
+        <div className="flex flex-wrap justify-center gap-3 sm:justify-start">
+          <Link
+            href="/akun/daftar"
+            className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-white px-5 py-3 text-sm font-bold text-orange-700 shadow-lg transition-colors hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+          >
+            <UserRoundPlus aria-hidden="true" className="h-4 w-4" />
+            <span>Daftar akun demo</span>
+          </Link>
+          <Link
+            href="/menu"
+            className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-white/70 bg-orange-700/20 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-orange-700/35 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+          >
+            <Utensils aria-hidden="true" className="h-4 w-4" />
+            <span>Lihat Menu</span>
+          </Link>
+        </div>
       </section>
     </main>
   );
