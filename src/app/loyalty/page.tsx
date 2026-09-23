@@ -138,7 +138,7 @@ export default async function MemberLoyaltyPage() {
               Hadiah loyalty
             </h2>
             <p className="mt-2 text-sm leading-6 text-stone-600">
-              Hadiah di bawah adalah contoh tampilan, belum dapat ditukar.
+              Hadiah dan indikator saldonya hanya contoh; penukaran belum aktif.
             </p>
           </div>
 
@@ -161,10 +161,23 @@ export default async function MemberLoyaltyPage() {
                   <p className="mt-2 min-h-10 text-sm leading-5 text-stone-600">
                     {reward.description}
                   </p>
-                  <p className="mt-4 inline-flex items-center gap-2 rounded-lg bg-violet-50 px-3 py-2 text-sm font-bold text-violet-900">
-                    <Sparkles aria-hidden="true" className="h-4 w-4" />
-                    {pointsFormatter.format(reward.pointsRequired)} poin contoh
-                  </p>
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    <p className="inline-flex items-center gap-2 rounded-lg bg-violet-50 px-3 py-2 text-sm font-bold text-violet-900">
+                      <Sparkles aria-hidden="true" className="h-4 w-4" />
+                      {pointsFormatter.format(reward.pointsRequired)} poin contoh
+                    </p>
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        points >= reward.pointsRequired
+                          ? "bg-emerald-50 text-emerald-800"
+                          : "bg-amber-50 text-amber-900"
+                      }`}
+                    >
+                      {points >= reward.pointsRequired
+                        ? "Saldo demo cukup"
+                        : `Kurang ${pointsFormatter.format(reward.pointsRequired - points)} poin demo`}
+                    </span>
+                  </div>
                 </article>
               ))}
             </div>
