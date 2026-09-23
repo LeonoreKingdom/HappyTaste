@@ -1,8 +1,10 @@
 import { menuCategories as frontendCategories, mockMenus } from "@/data/mock-menu";
 import { mockBanners, mockPromos } from "@/data/mock-promos";
 import { mockTables } from "@/data/mock-tables";
+import { mockLocationContactInfo } from "@/data/mock-location-contact";
+import { mockReservationOutlets } from "@/data/mock-reservations";
 import { db } from "./index";
-import { banners, menuCategories, menus, promos, restaurantTables } from "./schema";
+import { banners, menuCategories, menus, outlets, promos, restaurantTables } from "./schema";
 
 const categoryIds = {
   "Makanan Utama": "makanan-utama",
@@ -71,14 +73,30 @@ const tableRows = mockTables.map((table, index) => ({
   status: "available" as const,
 }));
 
+const outletRows = mockReservationOutlets.map((outlet) => ({
+  id: outlet.id,
+  name: outlet.name,
+  address: outlet.address,
+  phone: mockLocationContactInfo.contactChannels.find((channel) => channel.id === "phone")?.value,
+  whatsapp: mockLocationContactInfo.contactChannels.find((channel) => channel.id === "whatsapp")?.value,
+  email: mockLocationContactInfo.contactChannels.find((channel) => channel.id === "email")?.value,
+  openingHours: mockLocationContactInfo.operatingHours,
+  facilities: [...mockLocationContactInfo.facilities],
+  latitude: outlet.latitude,
+  longitude: outlet.longitude,
+  isDemoLocation: outlet.isDemoLocation,
+  isActive: true,
+}));
+
 db.transaction((tx) => {
   tx.insert(menuCategories).values(categoryRows).onConflictDoNothing().run();
   tx.insert(menus).values(menuRows).onConflictDoNothing().run();
   tx.insert(promos).values(promoRows).onConflictDoNothing().run();
   tx.insert(banners).values(bannerRows).onConflictDoNothing().run();
   tx.insert(restaurantTables).values(tableRows).onConflictDoNothing().run();
+  tx.insert(outlets).values(outletRows).onConflictDoNothing().run();
 });
 
 console.log(
-  `Seed siap: ${categoryRows.length} kategori, ${menuRows.length} menu, ${promoRows.length} promo, ${bannerRows.length} banner, ${tableRows.length} meja.`,
+  `Seed siap: ${categoryRows.length} kategori, ${menuRows.length} menu, ${promoRows.length} promo, ${bannerRows.length} banner, ${tableRows.length} meja, ${outletRows.length} outlet.`,
 );
