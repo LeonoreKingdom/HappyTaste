@@ -213,6 +213,13 @@ export default function HomePage() {
             <Utensils aria-hidden="true" className="h-4 w-4" />
             <span>Lihat Menu</span>
           </Link>
+          <Link
+            href="/loyalty"
+            className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-white/70 bg-orange-700/20 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-orange-700/35 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+          >
+            <Award aria-hidden="true" className="h-4 w-4" />
+            <span>Lihat Loyalty & Poin</span>
+          </Link>
         </div>
       </section>
     </main>

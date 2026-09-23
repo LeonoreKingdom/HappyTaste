@@ -183,6 +183,12 @@ export default async function MemberProfilePage() {
               >
                 Lihat promo
               </Link>
+              <Link
+                href="/loyalty"
+                className="rounded-lg border border-violet-200 bg-white px-4 py-2 text-sm font-semibold text-violet-800 transition hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-violet-200"
+              >
+                Loyalty & poin demo
+              </Link>
             </div>
           </section>
         </aside>
