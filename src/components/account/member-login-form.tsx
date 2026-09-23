@@ -115,6 +115,14 @@ export function MemberLoginForm() {
                 className="w-full rounded-xl border border-orange-200 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
                 placeholder="Masukkan kata sandi"
               />
+              <p className="mt-2 text-right text-sm">
+                <Link
+                  href="/akun/lupa-password"
+                  className="font-semibold text-orange-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+                >
+                  Lupa kata sandi?
+                </Link>
+              </p>
             </div>
 
             {formError ? (
