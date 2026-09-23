@@ -2,10 +2,12 @@ import { betterAuth } from "better-auth";
 import { APIError } from "better-auth/api";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { admin } from "better-auth/plugins";
+import { after } from "next/server";
 
 import { db } from "@/db";
 import * as authSchema from "@/db/schema/auth";
 import { memberProfiles } from "@/db/schema/member-profiles";
+import { sendPasswordResetEmail } from "@/lib/email";
 
 const MEMBER_SIGN_UP_PATH = "/sign-up/email";
 const MAX_MEMBER_PHONE_LENGTH = 32;
@@ -36,6 +38,16 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    revokeSessionsOnPasswordReset: true,
+    sendResetPassword: async ({ user, url }) => {
+      after(async () => {
+        try {
+          await sendPasswordResetEmail({ to: user.email, resetUrl: url });
+        } catch {
+          console.error("Password reset email delivery failed.");
+        }
+      });
+    },
   },
   databaseHooks: {
     user: {

@@ -2,15 +2,41 @@
 
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
-import { ArrowLeft, Check, Info, MailQuestion } from "lucide-react";
+import { ArrowLeft, Check, Info, LoaderCircle, MailQuestion } from "lucide-react";
+
+import { authClient } from "@/lib/auth-client";
 
 export function MemberForgotPasswordForm() {
-  const [isPreviewReady, setIsPreviewReady] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [requestSent, setRequestSent] = useState(false);
+  const [formError, setFormError] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    event.currentTarget.reset();
-    setIsPreviewReady(true);
+
+    const form = event.currentTarget;
+    const email = String(new FormData(form).get("email") ?? "").trim();
+    const redirectTo = new URL("/reset-password", window.location.origin).toString();
+
+    setIsSubmitting(true);
+    setRequestSent(false);
+    setFormError("");
+
+    try {
+      const { error } = await authClient.requestPasswordReset({ email, redirectTo });
+
+      if (error) {
+        setFormError("Permintaan belum dapat diproses. Coba lagi sebentar.");
+        return;
+      }
+
+      form.reset();
+      setRequestSent(true);
+    } catch {
+      setFormError("Permintaan belum dapat diproses. Coba lagi sebentar.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -23,12 +49,12 @@ export function MemberForgotPasswordForm() {
       </Link>
 
       <header className="max-w-3xl">
-        <p className="text-sm font-semibold tracking-wide text-orange-700">AKUN MEMBER · DEMO</p>
+        <p className="text-sm font-semibold tracking-wide text-orange-700">AKUN MEMBER</p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-stone-950 sm:text-4xl">
           Lupa kata sandi?
         </h1>
         <p className="mt-3 leading-7 text-stone-600">
-          Masukkan email untuk melihat pratinjau langkah pemulihan akun.
+          Masukkan email akun member. Jika email terdaftar, tautan reset akan dikirim.
         </p>
       </header>
 
@@ -42,16 +68,19 @@ export function MemberForgotPasswordForm() {
               <MailQuestion aria-hidden="true" className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-orange-700">PEMULIHAN AKUN · DEMO</p>
+              <p className="text-sm font-semibold text-orange-700">PEMULIHAN AKUN</p>
               <h2 id="forgot-password-heading" className="text-xl font-bold text-stone-900">
-                Minta petunjuk pemulihan
+                Minta tautan reset
               </h2>
             </div>
           </div>
 
           <form
             onSubmit={handleSubmit}
-            onInput={() => setIsPreviewReady(false)}
+            onInput={() => {
+              setRequestSent(false);
+              setFormError("");
+            }}
             className="space-y-5"
           >
             <div>
@@ -71,28 +100,37 @@ export function MemberForgotPasswordForm() {
                 placeholder="nama@email.com"
               />
               <p id="recovery-email-note" className="mt-2 text-xs leading-5 text-stone-500">
-                Formulir ini hanya simulasi dan tidak memeriksa status email akun.
+                Demi privasi, halaman ini tidak mengungkap apakah email terdaftar.
               </p>
             </div>
 
-            {isPreviewReady ? (
+            {formError ? (
+              <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm leading-6 text-rose-900">
+                {formError}
+              </p>
+            ) : null}
+
+            {requestSent ? (
               <p
                 role="status"
                 className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-950"
               >
                 <Check aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>
-                  Pratinjau selesai. Tidak ada email yang dikirim, alamat tidak diperiksa, dan kata
-                  sandi tidak diubah.
+                  Jika email terdaftar, tautan reset akan dikirim. Periksa kotak masuk dan folder
+                  spam.
                 </span>
               </p>
             ) : null}
 
             <button
               type="submit"
-              className="inline-flex w-full items-center justify-center rounded-xl bg-orange-700 px-5 py-3 font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-orange-700 px-5 py-3 font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 disabled:cursor-wait disabled:opacity-70"
             >
-              Lihat pratinjau pemulihan
+              {isSubmitting ? <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" /> : null}
+              {isSubmitting ? "Mengirim permintaan..." : "Kirim tautan reset"}
             </button>
           </form>
 
@@ -111,10 +149,10 @@ export function MemberForgotPasswordForm() {
           <div className="flex items-start gap-3">
             <Info aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-amber-800" />
             <div>
-              <h2 className="font-bold text-amber-950">Pemulihan belum terhubung</h2>
+              <h2 className="font-bold text-amber-950">Privasi akun</h2>
               <p className="mt-2 text-sm leading-6 text-amber-900">
-                Halaman ini hanya demonstrasi antarmuka. Tidak ada permintaan yang dikirim ke
-                Better Auth, email tidak dikirim, dan tidak ada token pemulihan yang dibuat.
+                Pesan konfirmasi selalu sama untuk melindungi privasi akun, terlepas dari apakah
+                alamat email terdaftar.
               </p>
             </div>
           </div>
