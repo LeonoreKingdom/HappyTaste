@@ -1,7 +1,7 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
@@ -39,6 +39,36 @@ export type AwardPointsForCompletedOrderResult =
         | "non_positive_total"
         | "zero_points";
     };
+
+export function getMemberLoyaltyOverview(userId: string) {
+  return db.transaction((tx) => {
+    const [profile] = tx
+      .select({ pointsBalance: memberProfiles.pointsBalance })
+      .from(memberProfiles)
+      .where(eq(memberProfiles.userId, userId))
+      .limit(1)
+      .all();
+
+    const transactions = tx
+      .select({
+        id: loyaltyTransactions.id,
+        type: loyaltyTransactions.type,
+        pointsDelta: loyaltyTransactions.pointsDelta,
+        balanceAfter: loyaltyTransactions.balanceAfter,
+        description: loyaltyTransactions.description,
+        createdAt: loyaltyTransactions.createdAt,
+      })
+      .from(loyaltyTransactions)
+      .where(eq(loyaltyTransactions.userId, userId))
+      .orderBy(desc(loyaltyTransactions.createdAt), desc(loyaltyTransactions.id))
+      .all();
+
+    return {
+      pointsBalance: profile?.pointsBalance ?? 0,
+      transactions,
+    };
+  });
+}
 
 export function awardPointsForCompletedOrder(
   orderId: string,
