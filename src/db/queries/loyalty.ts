@@ -1,10 +1,11 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
+  loyaltyRewards,
   loyaltyTransactions,
   memberProfiles,
   orders,
@@ -39,6 +40,19 @@ export type AwardPointsForCompletedOrderResult =
         | "non_positive_total"
         | "zero_points";
     };
+
+export async function listActiveLoyaltyRewards() {
+  return db
+    .select({
+      id: loyaltyRewards.id,
+      name: loyaltyRewards.name,
+      description: loyaltyRewards.description,
+      pointsRequired: loyaltyRewards.pointsRequired,
+    })
+    .from(loyaltyRewards)
+    .where(eq(loyaltyRewards.isActive, true))
+    .orderBy(asc(loyaltyRewards.pointsRequired), asc(loyaltyRewards.name));
+}
 
 export function getMemberLoyaltyOverview(userId: string) {
   return db.transaction((tx) => {
