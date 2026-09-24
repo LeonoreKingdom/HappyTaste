@@ -1,7 +1,7 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
@@ -41,6 +41,22 @@ export type AwardPointsForCompletedOrderResult =
         | "zero_points";
     };
 
+export type RedeemLoyaltyRewardResult =
+  | {
+      status: "redeemed" | "already_redeemed";
+      rewardId: string;
+      pointsDeducted: number;
+      balanceAfter: number;
+    }
+  | {
+      status: "skipped";
+      reason:
+        | "reward_not_available"
+        | "member_profile_missing"
+        | "insufficient_balance"
+        | "invalid_request";
+    };
+
 export async function listActiveLoyaltyRewards() {
   return db
     .select({
@@ -52,6 +68,122 @@ export async function listActiveLoyaltyRewards() {
     .from(loyaltyRewards)
     .where(eq(loyaltyRewards.isActive, true))
     .orderBy(asc(loyaltyRewards.pointsRequired), asc(loyaltyRewards.name));
+}
+
+export function redeemLoyaltyReward(
+  userId: string,
+  rewardId: string,
+  idempotencyKey: string,
+): RedeemLoyaltyRewardResult {
+  const normalizedRewardId = rewardId.trim();
+  const normalizedIdempotencyKey = idempotencyKey.trim();
+  if (!normalizedRewardId || !normalizedIdempotencyKey) {
+    return { status: "skipped", reason: "invalid_request" };
+  }
+
+  const referenceId = JSON.stringify([normalizedRewardId, normalizedIdempotencyKey]);
+
+  return db.transaction((tx) => {
+    const [existingRedemption] = tx
+      .select({
+        pointsDelta: loyaltyTransactions.pointsDelta,
+        balanceAfter: loyaltyTransactions.balanceAfter,
+      })
+      .from(loyaltyTransactions)
+      .where(
+        and(
+          eq(loyaltyTransactions.userId, userId),
+          eq(loyaltyTransactions.referenceType, "reward_redemption"),
+          eq(loyaltyTransactions.referenceId, referenceId),
+          eq(loyaltyTransactions.type, "redeem"),
+        ),
+      )
+      .limit(1)
+      .all();
+
+    if (existingRedemption) {
+      return {
+        status: "already_redeemed",
+        rewardId: normalizedRewardId,
+        pointsDeducted: Math.abs(existingRedemption.pointsDelta),
+        balanceAfter: existingRedemption.balanceAfter,
+      };
+    }
+
+    const [reward] = tx
+      .select({
+        id: loyaltyRewards.id,
+        name: loyaltyRewards.name,
+        pointsRequired: loyaltyRewards.pointsRequired,
+      })
+      .from(loyaltyRewards)
+      .where(
+        and(
+          eq(loyaltyRewards.id, normalizedRewardId),
+          eq(loyaltyRewards.isActive, true),
+        ),
+      )
+      .limit(1)
+      .all();
+
+    if (!reward) {
+      return { status: "skipped", reason: "reward_not_available" };
+    }
+
+    const [profile] = tx
+      .select({ pointsBalance: memberProfiles.pointsBalance })
+      .from(memberProfiles)
+      .where(eq(memberProfiles.userId, userId))
+      .limit(1)
+      .all();
+
+    if (!profile) {
+      return { status: "skipped", reason: "member_profile_missing" };
+    }
+
+    if (profile.pointsBalance < reward.pointsRequired) {
+      return { status: "skipped", reason: "insufficient_balance" };
+    }
+
+    const [updatedProfile] = tx
+      .update(memberProfiles)
+      .set({
+        pointsBalance: sql`${memberProfiles.pointsBalance} - ${reward.pointsRequired}`,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(memberProfiles.userId, userId),
+          gte(memberProfiles.pointsBalance, reward.pointsRequired),
+        ),
+      )
+      .returning({ pointsBalance: memberProfiles.pointsBalance })
+      .all();
+
+    if (!updatedProfile) {
+      return { status: "skipped", reason: "insufficient_balance" };
+    }
+
+    tx.insert(loyaltyTransactions)
+      .values({
+        id: randomUUID(),
+        userId,
+        type: "redeem",
+        pointsDelta: -reward.pointsRequired,
+        balanceAfter: updatedProfile.pointsBalance,
+        description: `Penukaran hadiah: ${reward.name}`,
+        referenceType: "reward_redemption",
+        referenceId,
+      })
+      .run();
+
+    return {
+      status: "redeemed",
+      rewardId: reward.id,
+      pointsDeducted: reward.pointsRequired,
+      balanceAfter: updatedProfile.pointsBalance,
+    };
+  });
 }
 
 export function getMemberLoyaltyOverview(userId: string) {
