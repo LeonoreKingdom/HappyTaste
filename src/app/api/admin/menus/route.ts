@@ -6,6 +6,23 @@ import { requireAdmin } from "@/lib/auth-session";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+export async function GET(request: Request) {
+  const authorization = await requireAdmin(request);
+  if (authorization.response) return authorization.response;
+
+  try {
+    const { getMenuList } = await import("@/db/queries/menus");
+    const data = await getMenuList();
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    console.error("Failed to list admin menus", error);
+    return NextResponse.json(
+      { success: false, error: "Daftar menu tidak dapat dimuat saat ini." },
+      { status: 500 },
+    );
+  }
+}
+
 export async function POST(request: Request) {
   const authorization = await requireAdmin(request);
   if (authorization.response) return authorization.response;

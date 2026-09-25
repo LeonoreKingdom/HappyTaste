@@ -17,6 +17,7 @@ export type MenuListItem = {
   imageUrl: string;
   ingredients: string[];
   portion: string;
+  isAvailable: boolean;
 };
 
 const menuSelection = {
@@ -29,6 +30,7 @@ const menuSelection = {
   imageUrl: menus.imageUrl,
   ingredients: menus.ingredients,
   portion: menus.portion,
+  isAvailable: menus.isAvailable,
 };
 
 type MenuRow = {
@@ -41,6 +43,7 @@ type MenuRow = {
   imageUrl: string;
   ingredients: string[];
   portion: string;
+  isAvailable: boolean;
 };
 
 function mapMenuRow(menu: MenuRow): MenuListItem {
@@ -56,6 +59,7 @@ function mapMenuRow(menu: MenuRow): MenuListItem {
     imageUrl: menu.imageUrl,
     ingredients: menu.ingredients,
     portion: menu.portion,
+    isAvailable: menu.isAvailable,
   };
 }
 

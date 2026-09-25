@@ -14,6 +14,7 @@ type AdminMenuInput = {
   imageUrl: string;
   ingredients: string[];
   portion: string;
+  isAvailable?: boolean;
 };
 
 type InputValidation =
@@ -39,6 +40,7 @@ function validateAdminMenuInput(value: unknown): InputValidation {
     ? body.ingredients.map((ingredient) => typeof ingredient === "string" ? ingredient.trim() : "")
     : [];
   const price = body.price;
+  const isAvailable = body.isAvailable;
 
   if (!name || name.length > 120) {
     return { success: false, error: "Nama menu wajib diisi dan maksimal 120 karakter." };
@@ -65,6 +67,9 @@ function validateAdminMenuInput(value: unknown): InputValidation {
   ) {
     return { success: false, error: "Isi 1–20 bahan, masing-masing maksimal 100 karakter." };
   }
+  if (isAvailable !== undefined && typeof isAvailable !== "boolean") {
+    return { success: false, error: "Status ketersediaan harus berupa boolean." };
+  }
 
   const isLocalAsset = imageUrl.startsWith("/") && !imageUrl.startsWith("//") && !imageUrl.includes("\\");
   if (!isLocalAsset) {
@@ -85,7 +90,16 @@ function validateAdminMenuInput(value: unknown): InputValidation {
 
   return {
     success: true,
-    data: { name, description, price, categoryId, imageUrl, ingredients, portion },
+    data: {
+      name,
+      description,
+      price,
+      categoryId,
+      imageUrl,
+      ingredients,
+      portion,
+      ...(typeof isAvailable === "boolean" ? { isAvailable } : {}),
+    },
   };
 }
 
