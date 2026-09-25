@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Megaphone, Tags } from "lucide-react";
+import Link from "next/link";
+import { Megaphone, Pencil, Plus, Tags } from "lucide-react";
 
 import { requireAdminPage } from "@/lib/auth-session";
 
@@ -85,6 +86,22 @@ export default async function AdminPromoPage() {
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-stone-950 sm:text-3xl">Promo &amp; banner</h1>
           <p className="mt-2 text-sm leading-6 text-stone-600">Konten yang ditampilkan berasal dari data tersimpan.</p>
         </div>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/admin/promo/banner/tambah"
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-stone-300 bg-white px-4 text-sm font-semibold text-stone-700 transition hover:border-orange-300 hover:bg-orange-50 hover:text-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+          >
+            <Plus aria-hidden="true" className="h-4 w-4" />
+            Tambah banner
+          </Link>
+          <Link
+            href="/admin/promo/tambah"
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-orange-700 px-4 text-sm font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+          >
+            <Plus aria-hidden="true" className="h-4 w-4" />
+            Tambah promo
+          </Link>
+        </div>
       </header>
 
       <section aria-label="Ringkasan promo dan banner" className="grid gap-3 sm:grid-cols-2">
@@ -120,6 +137,7 @@ export default async function AdminPromoPage() {
                   <th scope="col" className="px-4 py-3">Nilai</th>
                   <th scope="col" className="px-4 py-3">Periode</th>
                   <th scope="col" className="px-5 py-3 sm:px-6">Status</th>
+                  <th scope="col" className="px-5 py-3 text-right sm:px-6">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
@@ -143,6 +161,16 @@ export default async function AdminPromoPage() {
                         <span className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${status.className}`}>
                           {status.label}
                         </span>
+                      </td>
+                      <td className="px-5 py-4 text-right align-top sm:px-6">
+                        <Link
+                          href={`/admin/promo/${encodeURIComponent(promo.id)}/edit`}
+                          aria-label={`Ubah promo ${promo.title}`}
+                          className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-stone-300 px-3 text-xs font-semibold text-stone-700 transition hover:border-orange-300 hover:bg-orange-50 hover:text-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+                        >
+                          <Pencil aria-hidden="true" className="h-3.5 w-3.5" />
+                          Ubah
+                        </Link>
                       </td>
                     </tr>
                   );
@@ -174,6 +202,7 @@ export default async function AdminPromoPage() {
                   <th scope="col" className="px-4 py-3">Promo terkait</th>
                   <th scope="col" className="px-4 py-3">Urutan</th>
                   <th scope="col" className="px-5 py-3 sm:px-6">Status</th>
+                  <th scope="col" className="px-5 py-3 text-right sm:px-6">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
@@ -184,6 +213,16 @@ export default async function AdminPromoPage() {
                     <td className="px-4 py-4 text-stone-600">{banner.promoTitle ?? "—"}</td>
                     <td className="px-4 py-4 text-stone-600">{banner.sortOrder}</td>
                     <td className="px-5 py-4 sm:px-6"><StatusBadge active={banner.isActive} label={banner.isActive ? "Aktif" : "Nonaktif"} /></td>
+                    <td className="px-5 py-4 text-right sm:px-6">
+                      <Link
+                        href={`/admin/promo/banner/${encodeURIComponent(banner.id)}/edit`}
+                        aria-label={`Ubah banner ${banner.title}`}
+                        className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-stone-300 px-3 text-xs font-semibold text-stone-700 transition hover:border-orange-300 hover:bg-orange-50 hover:text-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+                      >
+                        <Pencil aria-hidden="true" className="h-3.5 w-3.5" />
+                        Ubah
+                      </Link>
+                    </td>
                   </tr>
                 ))}
               </tbody>

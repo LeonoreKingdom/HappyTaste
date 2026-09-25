@@ -11,12 +11,12 @@ export async function GET(request: Request) {
 
   try {
     const { getAdminPromoOverview } = await import("@/db/queries/promos");
-    const data = await getAdminPromoOverview();
-    return NextResponse.json({ success: true, data });
+    const { banners } = await getAdminPromoOverview();
+    return NextResponse.json({ success: true, data: banners });
   } catch (error) {
-    console.error("Failed to list admin promos", error);
+    console.error("Failed to list admin banners", error);
     return NextResponse.json(
-      { success: false, error: "Daftar promo tidak dapat dimuat saat ini." },
+      { success: false, error: "Daftar banner tidak dapat dimuat saat ini." },
       { status: 500 },
     );
   }
@@ -37,8 +37,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { createAdminPromo } = await import("@/db/services/admin-promos");
-    const result = await createAdminPromo(body);
+    const { createAdminBanner } = await import("@/db/services/admin-promos");
+    const result = await createAdminBanner(body);
     if (!result.success) {
       return NextResponse.json(
         { success: false, error: result.error },
@@ -48,9 +48,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data: { id: result.id } }, { status: 201 });
   } catch (error) {
-    console.error("Failed to create admin promo", error);
+    console.error("Failed to create admin banner", error);
     return NextResponse.json(
-      { success: false, error: "Promo tidak dapat disimpan saat ini." },
+      { success: false, error: "Banner tidak dapat disimpan saat ini." },
       { status: 500 },
     );
   }

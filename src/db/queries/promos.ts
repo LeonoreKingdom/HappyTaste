@@ -112,6 +112,16 @@ export async function getAdminPromoOverview() {
   return { promos: allPromos, banners: allBanners };
 }
 
+export async function getAdminBannerById(id: string) {
+  const [banner] = await db
+    .select()
+    .from(banners)
+    .where(eq(banners.id, id))
+    .limit(1);
+
+  return banner ?? null;
+}
+
 export interface GetPromoByIdOptions {
   withBanners?: boolean;
   onlyActive?: boolean;

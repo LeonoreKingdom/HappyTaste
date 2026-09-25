@@ -5,36 +5,36 @@ import { requireAdmin } from "@/lib/auth-session";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type PromoRouteContext = {
+type BannerRouteContext = {
   params: Promise<{ id: string }>;
 };
 
-export async function GET(request: Request, { params }: PromoRouteContext) {
+export async function GET(request: Request, { params }: BannerRouteContext) {
   const authorization = await requireAdmin(request);
   if (authorization.response) return authorization.response;
 
   const { id } = await params;
   try {
-    const { getPromoById } = await import("@/db/queries/promos");
-    const promo = await getPromoById(id, { withBanners: true });
-    if (!promo) {
+    const { getAdminBannerById } = await import("@/db/queries/promos");
+    const banner = await getAdminBannerById(id);
+    if (!banner) {
       return NextResponse.json(
-        { success: false, error: "Promo tidak ditemukan." },
+        { success: false, error: "Banner tidak ditemukan." },
         { status: 404 },
       );
     }
 
-    return NextResponse.json({ success: true, data: promo });
+    return NextResponse.json({ success: true, data: banner });
   } catch (error) {
-    console.error("Failed to load admin promo", error);
+    console.error("Failed to load admin banner", error);
     return NextResponse.json(
-      { success: false, error: "Detail promo tidak dapat dimuat saat ini." },
+      { success: false, error: "Detail banner tidak dapat dimuat saat ini." },
       { status: 500 },
     );
   }
 }
 
-export async function PUT(request: Request, { params }: PromoRouteContext) {
+export async function PUT(request: Request, { params }: BannerRouteContext) {
   const authorization = await requireAdmin(request);
   if (authorization.response) return authorization.response;
 
@@ -50,8 +50,8 @@ export async function PUT(request: Request, { params }: PromoRouteContext) {
   }
 
   try {
-    const { updateAdminPromo } = await import("@/db/services/admin-promos");
-    const result = await updateAdminPromo(id, body);
+    const { updateAdminBanner } = await import("@/db/services/admin-promos");
+    const result = await updateAdminBanner(id, body);
     if (!result.success) {
       return NextResponse.json(
         { success: false, error: result.error },
@@ -61,15 +61,15 @@ export async function PUT(request: Request, { params }: PromoRouteContext) {
 
     return NextResponse.json({ success: true, data: { id: result.id } });
   } catch (error) {
-    console.error("Failed to update admin promo", error);
+    console.error("Failed to update admin banner", error);
     return NextResponse.json(
-      { success: false, error: "Promo tidak dapat diperbarui saat ini." },
+      { success: false, error: "Banner tidak dapat diperbarui saat ini." },
       { status: 500 },
     );
   }
 }
 
-export async function PATCH(request: Request, context: PromoRouteContext) {
+export async function PATCH(request: Request, context: BannerRouteContext) {
   return PUT(request, context);
 }
 
@@ -78,7 +78,7 @@ export async function DELETE(request: Request) {
   if (authorization.response) return authorization.response;
 
   return NextResponse.json(
-    { success: false, error: "Penghapusan promo belum tersedia." },
+    { success: false, error: "Penghapusan banner belum tersedia." },
     { status: 405, headers: { Allow: "GET, PUT, PATCH" } },
   );
 }
