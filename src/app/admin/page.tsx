@@ -10,7 +10,7 @@ import {
 import {
   getAdminDailyDashboard,
   getAdminSalesTrend,
-  type AdminSalesTrendRange,
+  parseAdminSalesTrendRange,
   type AdminDashboardOrderStatus,
 } from "@/db/queries/admin-dashboard";
 import { requireAdminPage } from "@/lib/auth-session";
@@ -55,22 +55,17 @@ type AdminDashboardSearchParams = {
   range?: string | string[];
 };
 
-function getSalesTrendRange(value: AdminDashboardSearchParams["range"]): AdminSalesTrendRange {
-  const candidate = Array.isArray(value) ? value[0] : value;
-
-  return candidate === "30d" || candidate === "90d" ? candidate : "7d";
-}
-
 export default async function AdminDashboardPage({
   searchParams,
 }: {
   searchParams: Promise<AdminDashboardSearchParams>;
 }) {
   await requireAdminPage();
-  const range = getSalesTrendRange((await searchParams).range);
+  const range = parseAdminSalesTrendRange((await searchParams).range);
+  const now = new Date();
   const [dashboard, salesTrend] = await Promise.all([
-    getAdminDailyDashboard(),
-    getAdminSalesTrend(range),
+    getAdminDailyDashboard(now),
+    getAdminSalesTrend(range, now),
   ]);
   const metrics = [
     {

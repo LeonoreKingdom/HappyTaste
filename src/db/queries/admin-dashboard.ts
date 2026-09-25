@@ -26,6 +26,14 @@ import {
 export type AdminDashboardOrderStatus = (typeof orderStatuses)[number];
 export type AdminSalesTrendRange = "7d" | "30d" | "90d";
 
+export function parseAdminSalesTrendRange(
+  value: string | string[] | null | undefined,
+): AdminSalesTrendRange {
+  const candidate = Array.isArray(value) ? value[0] : value;
+
+  return candidate === "30d" || candidate === "90d" ? candidate : "7d";
+}
+
 const adminSalesTrendRangeDays: Record<AdminSalesTrendRange, number> = {
   "7d": 7,
   "30d": 30,
