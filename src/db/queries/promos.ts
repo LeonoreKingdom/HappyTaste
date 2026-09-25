@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { promos, banners } from "@/db/schema";
-import { and, eq, gte, lte, desc } from "drizzle-orm";
+import { and, asc, eq, gte, lte, desc } from "drizzle-orm";
 
 export interface GetPromosOptions {
   type?: string;
@@ -81,6 +81,35 @@ export async function getAllPromos(options?: GetPromosOptions) {
     .select()
     .from(promos)
     .orderBy(desc(promos.createdAt));
+}
+
+export async function getAdminPromoOverview() {
+  const [allPromos, allBanners] = await Promise.all([
+    db.query.promos.findMany({
+      orderBy: [desc(promos.createdAt)],
+      with: {
+        banners: {
+          orderBy: [asc(banners.sortOrder)],
+        },
+      },
+    }),
+    db
+      .select({
+        id: banners.id,
+        title: banners.title,
+        imageUrl: banners.imageUrl,
+        link: banners.link,
+        sortOrder: banners.sortOrder,
+        isActive: banners.isActive,
+        promoId: banners.promoId,
+        promoTitle: promos.title,
+      })
+      .from(banners)
+      .leftJoin(promos, eq(banners.promoId, promos.id))
+      .orderBy(asc(banners.sortOrder), asc(banners.title)),
+  ]);
+
+  return { promos: allPromos, banners: allBanners };
 }
 
 export interface GetPromoByIdOptions {
