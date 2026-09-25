@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
 import {
-  CalendarDays,
   CircleUserRound,
   LayoutDashboard,
   ShoppingBag,
@@ -12,8 +11,6 @@ import {
 } from "lucide-react";
 
 const comingSoonItems = [
-  { label: "Pesanan", icon: ShoppingBag },
-  { label: "Reservasi", icon: CalendarDays },
   { label: "Member & poin", icon: CircleUserRound },
 ] as const;
 
@@ -22,6 +19,7 @@ export function AdminPanelNavigation() {
   const dashboardIsActive = activeSegment === null;
   const menuIsActive = activeSegment === "menu";
   const promoIsActive = activeSegment === "promo";
+  const operationsAreActive = activeSegment === "pesanan-reservasi";
 
   return (
     <nav aria-label="Menu panel pengelola" className="mt-4">
@@ -69,6 +67,20 @@ export function AdminPanelNavigation() {
           >
             <Tags aria-hidden="true" className="h-4 w-4 shrink-0" />
             Promo &amp; banner
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/admin/pesanan-reservasi"
+            aria-current={operationsAreActive ? "page" : undefined}
+            className={`flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 ${
+              operationsAreActive
+                ? "bg-orange-50 text-orange-800 ring-1 ring-inset ring-orange-100"
+                : "text-stone-600 hover:bg-stone-50 hover:text-orange-800"
+            }`}
+          >
+            <ShoppingBag aria-hidden="true" className="h-4 w-4 shrink-0" />
+            Pesanan &amp; reservasi
           </Link>
         </li>
         {comingSoonItems.map((item) => {
