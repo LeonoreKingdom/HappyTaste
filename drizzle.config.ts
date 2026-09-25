@@ -1,10 +1,26 @@
 import { defineConfig } from "drizzle-kit";
 
-export default defineConfig({
+const databaseUrl = process.env.TURSO_DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error("TURSO_DATABASE_URL must be set before running Drizzle Kit.");
+}
+
+const baseConfig = {
   schema: "./src/db/schema/index.ts",
   out: "./drizzle",
-  dialect: "sqlite",
-  dbCredentials: {
-    url: process.env.DATABASE_URL || "sqlite.db",
-  },
-});
+};
+
+export default databaseUrl.startsWith("file:")
+  ? defineConfig({
+      ...baseConfig,
+      dialect: "sqlite",
+      dbCredentials: { url: databaseUrl },
+    })
+  : defineConfig({
+      ...baseConfig,
+      dialect: "turso",
+      dbCredentials: {
+        url: databaseUrl,
+        authToken: process.env.TURSO_AUTH_TOKEN,
+      },
+    });

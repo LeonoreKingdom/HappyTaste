@@ -12,7 +12,7 @@ import {
   user as authUser,
 } from "@/db/schema";
 
-export function updateAdminLoyaltyEarningRule(
+export async function updateAdminLoyaltyEarningRule(
   adminUserId: string,
   value: unknown,
 ) {
@@ -32,13 +32,12 @@ export function updateAdminLoyaltyEarningRule(
 
   const idrPerPoint = (value as { idrPerPoint: number }).idrPerPoint;
 
-  return db.transaction((tx) => {
-    const [existing] = tx
+  return db.transaction(async (tx) => {
+    const [existing] = await tx
       .select({ idrPerPoint: loyaltySettings.idrPerPoint })
       .from(loyaltySettings)
       .where(eq(loyaltySettings.id, "default"))
-      .limit(1)
-      .all();
+      .limit(1);
 
     if (!existing) {
       return {
@@ -56,12 +55,11 @@ export function updateAdminLoyaltyEarningRule(
       } as const;
     }
 
-    const [updated] = tx
+    const [updated] = await tx
       .update(loyaltySettings)
       .set({ idrPerPoint, updatedByUserId: adminUserId, updatedAt: new Date() })
       .where(eq(loyaltySettings.id, "default"))
-      .returning({ idrPerPoint: loyaltySettings.idrPerPoint })
-      .all();
+      .returning({ idrPerPoint: loyaltySettings.idrPerPoint });
 
     if (!updated) {
       return {
@@ -71,14 +69,13 @@ export function updateAdminLoyaltyEarningRule(
       } as const;
     }
 
-    tx.insert(loyaltyEarningRuleChanges)
+    await tx.insert(loyaltyEarningRuleChanges)
       .values({
         id: randomUUID(),
         previousIdrPerPoint: existing.idrPerPoint,
         newIdrPerPoint: idrPerPoint,
         changedByUserId: adminUserId,
-      })
-      .run();
+      });
 
     return {
       success: true,
@@ -89,7 +86,7 @@ export function updateAdminLoyaltyEarningRule(
   });
 }
 
-export function adjustAdminMemberPoints(
+export async function adjustAdminMemberPoints(
   adminUserId: string,
   memberId: string,
   input: unknown,
@@ -120,8 +117,8 @@ export function adjustAdminMemberPoints(
   const delta = pointsDelta as number;
   const description = `Penyesuaian admin: ${reason}`;
 
-  return db.transaction((tx) => {
-    const [existingAdjustment] = tx
+  return db.transaction(async (tx) => {
+    const [existingAdjustment] = await tx
       .select({
         pointsDelta: loyaltyTransactions.pointsDelta,
         balanceAfter: loyaltyTransactions.balanceAfter,
@@ -137,8 +134,7 @@ export function adjustAdminMemberPoints(
           eq(loyaltyTransactions.type, "adjustment"),
         ),
       )
-      .limit(1)
-      .all();
+      .limit(1);
 
     if (existingAdjustment) {
       if (
@@ -161,7 +157,7 @@ export function adjustAdminMemberPoints(
       } as const;
     }
 
-    const [member] = tx
+    const [member] = await tx
       .select({
         userId: memberProfiles.userId,
         pointsBalance: memberProfiles.pointsBalance,
@@ -169,8 +165,7 @@ export function adjustAdminMemberPoints(
       .from(memberProfiles)
       .innerJoin(authUser, eq(memberProfiles.userId, authUser.id))
       .where(and(eq(memberProfiles.userId, normalizedMemberId), eq(authUser.role, "user")))
-      .limit(1)
-      .all();
+      .limit(1);
 
     if (!member) {
       return { success: false, status: 404, error: "Member tidak ditemukan." } as const;
@@ -184,7 +179,7 @@ export function adjustAdminMemberPoints(
       return { success: false, status: 409, error: "Saldo poin tidak dapat menjadi negatif." } as const;
     }
 
-    const [updated] = tx
+    const [updated] = await tx
       .update(memberProfiles)
       .set({ pointsBalance: balanceAfter, updatedAt: new Date() })
       .where(
@@ -193,8 +188,7 @@ export function adjustAdminMemberPoints(
           eq(memberProfiles.pointsBalance, member.pointsBalance),
         ),
       )
-      .returning({ pointsBalance: memberProfiles.pointsBalance })
-      .all();
+      .returning({ pointsBalance: memberProfiles.pointsBalance });
 
     if (!updated) {
       return {
@@ -204,7 +198,7 @@ export function adjustAdminMemberPoints(
       } as const;
     }
 
-    tx.insert(loyaltyTransactions)
+    await tx.insert(loyaltyTransactions)
       .values({
         id: randomUUID(),
         userId: normalizedMemberId,
@@ -215,8 +209,7 @@ export function adjustAdminMemberPoints(
         description,
         referenceType: "admin_adjustment",
         referenceId: requestId,
-      })
-      .run();
+      });
 
     return {
       success: true,

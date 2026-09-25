@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const result = redeemLoyaltyReward(
+    const result = await redeemLoyaltyReward(
       session.user.id,
       rewardId,
       idempotencyKey,

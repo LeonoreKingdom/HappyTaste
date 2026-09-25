@@ -159,8 +159,8 @@ async function createOrder(input: {
   });
   const total = itemRows.reduce((sum, item) => sum + item.subtotal, 0);
 
-  db.transaction((tx) => {
-    tx.insert(orders)
+  await db.transaction(async (tx) => {
+    await tx.insert(orders)
       .values({
         id: orderId,
         userId: input.userId,
@@ -172,9 +172,8 @@ async function createOrder(input: {
         total,
         notes: input.notes ?? null,
         scheduledAt: input.scheduledAt ?? null,
-      })
-      .run();
-    tx.insert(orderItems).values(itemRows).run();
+      });
+    await tx.insert(orderItems).values(itemRows);
   });
 
   return {

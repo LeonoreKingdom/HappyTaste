@@ -71,11 +71,11 @@ export async function listActiveLoyaltyRewards() {
     .orderBy(asc(loyaltyRewards.pointsRequired), asc(loyaltyRewards.name));
 }
 
-export function redeemLoyaltyReward(
+export async function redeemLoyaltyReward(
   userId: string,
   rewardId: string,
   idempotencyKey: string,
-): RedeemLoyaltyRewardResult {
+): Promise<RedeemLoyaltyRewardResult> {
   const normalizedRewardId = rewardId.trim();
   const normalizedIdempotencyKey = idempotencyKey.trim();
   if (!normalizedRewardId || !normalizedIdempotencyKey) {
@@ -84,8 +84,8 @@ export function redeemLoyaltyReward(
 
   const referenceId = JSON.stringify([normalizedRewardId, normalizedIdempotencyKey]);
 
-  return db.transaction((tx) => {
-    const [existingRedemption] = tx
+  return db.transaction(async (tx) => {
+    const [existingRedemption] = await tx
       .select({
         pointsDelta: loyaltyTransactions.pointsDelta,
         balanceAfter: loyaltyTransactions.balanceAfter,
@@ -99,8 +99,7 @@ export function redeemLoyaltyReward(
           eq(loyaltyTransactions.type, "redeem"),
         ),
       )
-      .limit(1)
-      .all();
+      .limit(1);
 
     if (existingRedemption) {
       return {
@@ -111,7 +110,7 @@ export function redeemLoyaltyReward(
       };
     }
 
-    const [reward] = tx
+    const [reward] = await tx
       .select({
         id: loyaltyRewards.id,
         name: loyaltyRewards.name,
@@ -124,19 +123,17 @@ export function redeemLoyaltyReward(
           eq(loyaltyRewards.isActive, true),
         ),
       )
-      .limit(1)
-      .all();
+      .limit(1);
 
     if (!reward) {
       return { status: "skipped", reason: "reward_not_available" };
     }
 
-    const [profile] = tx
+    const [profile] = await tx
       .select({ pointsBalance: memberProfiles.pointsBalance })
       .from(memberProfiles)
       .where(eq(memberProfiles.userId, userId))
-      .limit(1)
-      .all();
+      .limit(1);
 
     if (!profile) {
       return { status: "skipped", reason: "member_profile_missing" };
@@ -146,7 +143,7 @@ export function redeemLoyaltyReward(
       return { status: "skipped", reason: "insufficient_balance" };
     }
 
-    const [updatedProfile] = tx
+    const [updatedProfile] = await tx
       .update(memberProfiles)
       .set({
         pointsBalance: sql`${memberProfiles.pointsBalance} - ${reward.pointsRequired}`,
@@ -158,14 +155,13 @@ export function redeemLoyaltyReward(
           gte(memberProfiles.pointsBalance, reward.pointsRequired),
         ),
       )
-      .returning({ pointsBalance: memberProfiles.pointsBalance })
-      .all();
+      .returning({ pointsBalance: memberProfiles.pointsBalance });
 
     if (!updatedProfile) {
       return { status: "skipped", reason: "insufficient_balance" };
     }
 
-    tx.insert(loyaltyTransactions)
+    await tx.insert(loyaltyTransactions)
       .values({
         id: randomUUID(),
         userId,
@@ -175,8 +171,7 @@ export function redeemLoyaltyReward(
         description: `Penukaran hadiah: ${reward.name}`,
         referenceType: "reward_redemption",
         referenceId,
-      })
-      .run();
+      });
 
     return {
       status: "redeemed",
@@ -187,16 +182,15 @@ export function redeemLoyaltyReward(
   });
 }
 
-export function getMemberLoyaltyOverview(userId: string) {
-  return db.transaction((tx) => {
-    const [profile] = tx
+export async function getMemberLoyaltyOverview(userId: string) {
+  return db.transaction(async (tx) => {
+    const [profile] = await tx
       .select({ pointsBalance: memberProfiles.pointsBalance })
       .from(memberProfiles)
       .where(eq(memberProfiles.userId, userId))
-      .limit(1)
-      .all();
+      .limit(1);
 
-    const transactions = tx
+    const transactions = await tx
       .select({
         id: loyaltyTransactions.id,
         type: loyaltyTransactions.type,
@@ -207,8 +201,7 @@ export function getMemberLoyaltyOverview(userId: string) {
       })
       .from(loyaltyTransactions)
       .where(eq(loyaltyTransactions.userId, userId))
-      .orderBy(desc(loyaltyTransactions.createdAt), desc(loyaltyTransactions.id))
-      .all();
+      .orderBy(desc(loyaltyTransactions.createdAt), desc(loyaltyTransactions.id));
 
     return {
       pointsBalance: profile?.pointsBalance ?? 0,
@@ -219,16 +212,16 @@ export function getMemberLoyaltyOverview(userId: string) {
 
 type LoyaltyTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
-export function awardPointsForCompletedOrderInTransaction(
+export async function awardPointsForCompletedOrderInTransaction(
   tx: LoyaltyTransaction,
   orderId: string,
-): AwardPointsForCompletedOrderResult {
+): Promise<AwardPointsForCompletedOrderResult> {
   const normalizedOrderId = orderId.trim();
   if (!normalizedOrderId || normalizedOrderId.length > 120) {
     return { status: "skipped", orderId, reason: "order_not_found" };
   }
 
-  const [order] = tx
+  const [order] = await tx
     .select({
       id: orders.id,
       userId: orders.userId,
@@ -237,8 +230,7 @@ export function awardPointsForCompletedOrderInTransaction(
     })
     .from(orders)
     .where(eq(orders.id, normalizedOrderId))
-    .limit(1)
-    .all();
+    .limit(1);
 
   if (!order) {
     return {
@@ -260,23 +252,21 @@ export function awardPointsForCompletedOrderInTransaction(
     return { status: "skipped", orderId: order.id, reason: "guest_order" };
   }
 
-  const [member] = tx
+  const [member] = await tx
     .select({ id: authUser.id, role: authUser.role })
     .from(authUser)
     .where(and(eq(authUser.id, order.userId), eq(authUser.role, "user")))
-    .limit(1)
-    .all();
+    .limit(1);
 
   if (!member) {
     return { status: "skipped", orderId: order.id, reason: "non_member_order" };
   }
 
-  const [profile] = tx
+  const [profile] = await tx
     .select({ userId: memberProfiles.userId })
     .from(memberProfiles)
     .where(eq(memberProfiles.userId, order.userId))
-    .limit(1)
-    .all();
+    .limit(1);
 
   if (!profile) {
     return {
@@ -286,7 +276,7 @@ export function awardPointsForCompletedOrderInTransaction(
     };
   }
 
-  const [existingAward] = tx
+  const [existingAward] = await tx
     .select({
       pointsDelta: loyaltyTransactions.pointsDelta,
       balanceAfter: loyaltyTransactions.balanceAfter,
@@ -300,8 +290,7 @@ export function awardPointsForCompletedOrderInTransaction(
         eq(loyaltyTransactions.type, "earn"),
       ),
     )
-    .limit(1)
-    .all();
+    .limit(1);
 
   if (existingAward) {
     return {
@@ -321,12 +310,11 @@ export function awardPointsForCompletedOrderInTransaction(
     };
   }
 
-  const [earningSettings] = tx
+  const [earningSettings] = await tx
     .select({ idrPerPoint: loyaltySettings.idrPerPoint })
     .from(loyaltySettings)
     .where(eq(loyaltySettings.id, "default"))
-    .limit(1)
-    .all();
+    .limit(1);
   if (!earningSettings) {
     throw new Error("Canonical loyalty earning settings are missing.");
   }
@@ -339,15 +327,14 @@ export function awardPointsForCompletedOrderInTransaction(
     return { status: "skipped", orderId: order.id, reason: "zero_points" };
   }
 
-  const [updatedProfile] = tx
+  const [updatedProfile] = await tx
     .update(memberProfiles)
     .set({
       pointsBalance: sql`${memberProfiles.pointsBalance} + ${pointsAwarded}`,
       updatedAt: new Date(),
     })
     .where(eq(memberProfiles.userId, order.userId))
-    .returning({ pointsBalance: memberProfiles.pointsBalance })
-    .all();
+    .returning({ pointsBalance: memberProfiles.pointsBalance });
 
   if (!updatedProfile) {
     return {
@@ -357,7 +344,7 @@ export function awardPointsForCompletedOrderInTransaction(
     };
   }
 
-  tx.insert(loyaltyTransactions)
+  await tx.insert(loyaltyTransactions)
     .values({
       id: randomUUID(),
       userId: order.userId,
@@ -367,8 +354,7 @@ export function awardPointsForCompletedOrderInTransaction(
       description: "Poin dari pesanan selesai",
       referenceType: "order",
       referenceId: order.id,
-    })
-    .run();
+    });
 
   return {
     status: "awarded",
@@ -379,8 +365,8 @@ export function awardPointsForCompletedOrderInTransaction(
   };
 }
 
-export function awardPointsForCompletedOrder(
+export async function awardPointsForCompletedOrder(
   orderId: string,
-): AwardPointsForCompletedOrderResult {
-  return db.transaction((tx) => awardPointsForCompletedOrderInTransaction(tx, orderId));
+): Promise<AwardPointsForCompletedOrderResult> {
+  return db.transaction(async (tx) => awardPointsForCompletedOrderInTransaction(tx, orderId));
 }
