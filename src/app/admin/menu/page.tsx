@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Utensils } from "lucide-react";
+import Link from "next/link";
+import { Pencil, Plus, Utensils } from "lucide-react";
 
 import type { MenuListItem } from "@/db/queries/menus";
 import { requireAdminPage } from "@/lib/auth-session";
@@ -52,9 +53,18 @@ export default async function AdminMenuPage() {
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-stone-950 sm:text-3xl">Kelola menu</h1>
           <p className="mt-2 text-sm leading-6 text-stone-600">Daftar menu yang tersimpan di katalog HappyTaste.</p>
         </div>
-        <p className="w-fit rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm font-semibold text-stone-700">
-          {menus.length} menu
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="w-fit rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm font-semibold text-stone-700">
+            {menus.length} menu
+          </p>
+          <Link
+            href="/admin/menu/tambah"
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-orange-700 px-4 text-sm font-semibold text-white transition hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+          >
+            <Plus aria-hidden="true" className="h-4 w-4" />
+            Tambah menu
+          </Link>
+        </div>
       </header>
 
       <section aria-label="Jumlah menu per kategori" className="grid gap-3 sm:grid-cols-3">
@@ -83,6 +93,7 @@ export default async function AdminMenuPage() {
                   <th scope="col" className="px-4 py-3">Porsi</th>
                   <th scope="col" className="px-4 py-3">Bahan</th>
                   <th scope="col" className="px-5 py-3 text-right sm:px-6">Harga</th>
+                  <th scope="col" className="px-5 py-3 text-right sm:px-6">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
@@ -99,6 +110,16 @@ export default async function AdminMenuPage() {
                     </td>
                     <td className="whitespace-nowrap px-5 py-4 text-right align-top font-semibold text-stone-900 sm:px-6">
                       {currencyFormatter.format(menu.price)}
+                    </td>
+                    <td className="px-5 py-4 text-right align-top sm:px-6">
+                      <Link
+                        href={`/admin/menu/${encodeURIComponent(menu.id)}/edit`}
+                        aria-label={`Ubah ${menu.name}`}
+                        className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-stone-300 px-3 text-xs font-semibold text-stone-700 transition hover:border-orange-300 hover:bg-orange-50 hover:text-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+                      >
+                        <Pencil aria-hidden="true" className="h-3.5 w-3.5" />
+                        Ubah
+                      </Link>
                     </td>
                   </tr>
                 ))}

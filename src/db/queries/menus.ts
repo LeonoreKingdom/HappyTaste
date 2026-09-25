@@ -19,6 +19,46 @@ export type MenuListItem = {
   portion: string;
 };
 
+const menuSelection = {
+  id: menus.id,
+  name: menus.name,
+  description: menus.description,
+  price: menus.price,
+  categoryId: menuCategories.id,
+  categoryName: menuCategories.name,
+  imageUrl: menus.imageUrl,
+  ingredients: menus.ingredients,
+  portion: menus.portion,
+};
+
+type MenuRow = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  categoryId: string;
+  categoryName: string;
+  imageUrl: string;
+  ingredients: string[];
+  portion: string;
+};
+
+function mapMenuRow(menu: MenuRow): MenuListItem {
+  return {
+    id: menu.id,
+    name: menu.name,
+    description: menu.description,
+    price: menu.price,
+    category: {
+      id: menu.categoryId,
+      name: menu.categoryName,
+    },
+    imageUrl: menu.imageUrl,
+    ingredients: menu.ingredients,
+    portion: menu.portion,
+  };
+}
+
 export async function getMenuList({ category, keyword }: {
   category?: string | null;
   keyword?: string | null;
@@ -42,33 +82,29 @@ export async function getMenuList({ category, keyword }: {
   ].filter((filter): filter is NonNullable<typeof filter> => filter !== undefined);
 
   const rows = await db
-    .select({
-      id: menus.id,
-      name: menus.name,
-      description: menus.description,
-      price: menus.price,
-      categoryId: menuCategories.id,
-      categoryName: menuCategories.name,
-      imageUrl: menus.imageUrl,
-      ingredients: menus.ingredients,
-      portion: menus.portion,
-    })
+    .select(menuSelection)
     .from(menus)
     .innerJoin(menuCategories, eq(menus.categoryId, menuCategories.id))
     .where(filters.length > 0 ? and(...filters) : undefined)
     .orderBy(asc(menuCategories.name), asc(menus.name));
 
-  return rows.map((menu) => ({
-    id: menu.id,
-    name: menu.name,
-    description: menu.description,
-    price: menu.price,
-    category: {
-      id: menu.categoryId,
-      name: menu.categoryName,
-    },
-    imageUrl: menu.imageUrl,
-    ingredients: menu.ingredients,
-    portion: menu.portion,
-  }));
+  return rows.map(mapMenuRow);
+}
+
+export async function getMenuCategories() {
+  return db
+    .select({ id: menuCategories.id, name: menuCategories.name })
+    .from(menuCategories)
+    .orderBy(asc(menuCategories.name));
+}
+
+export async function getMenuById(id: string): Promise<MenuListItem | null> {
+  const [menu] = await db
+    .select(menuSelection)
+    .from(menus)
+    .innerJoin(menuCategories, eq(menus.categoryId, menuCategories.id))
+    .where(eq(menus.id, id))
+    .limit(1);
+
+  return menu ? mapMenuRow(menu) : null;
 }
