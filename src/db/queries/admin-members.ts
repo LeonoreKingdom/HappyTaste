@@ -15,42 +15,50 @@ import { user as authUser } from "@/db/schema/auth";
 const ADMIN_MEMBER_LIST_LIMIT = 100;
 const ADMIN_LOYALTY_HISTORY_LIMIT = 100;
 
-export async function getAdminMemberOverview() {
+export async function getAdminMemberList() {
+  return db
+    .select({
+      id: authUser.id,
+      name: authUser.name,
+      email: authUser.email,
+      phone: memberProfiles.phone,
+      pointsBalance: memberProfiles.pointsBalance,
+      joinedAt: authUser.createdAt,
+    })
+    .from(memberProfiles)
+    .innerJoin(authUser, eq(memberProfiles.userId, authUser.id))
+    .where(eq(authUser.role, "user"))
+    .orderBy(desc(authUser.createdAt), desc(authUser.id))
+    .limit(ADMIN_MEMBER_LIST_LIMIT);
+}
+
+export async function getAdminLoyaltyHistory() {
   const adjustmentActor = alias(authUser, "adjustment_actor");
+  return db
+    .select({
+      id: loyaltyTransactions.id,
+      memberId: authUser.id,
+      memberName: authUser.name,
+      memberEmail: authUser.email,
+      adjustmentByName: adjustmentActor.name,
+      type: loyaltyTransactions.type,
+      pointsDelta: loyaltyTransactions.pointsDelta,
+      balanceAfter: loyaltyTransactions.balanceAfter,
+      description: loyaltyTransactions.description,
+      createdAt: loyaltyTransactions.createdAt,
+    })
+    .from(loyaltyTransactions)
+    .innerJoin(authUser, eq(loyaltyTransactions.userId, authUser.id))
+    .leftJoin(adjustmentActor, eq(loyaltyTransactions.createdByUserId, adjustmentActor.id))
+    .orderBy(desc(loyaltyTransactions.createdAt), desc(loyaltyTransactions.id))
+    .limit(ADMIN_LOYALTY_HISTORY_LIMIT);
+}
+
+export async function getAdminMemberOverview() {
   const ruleChangeActor = alias(authUser, "rule_change_actor");
   const [members, transactions, settings, ruleChanges] = await Promise.all([
-    db
-      .select({
-        id: authUser.id,
-        name: authUser.name,
-        email: authUser.email,
-        phone: memberProfiles.phone,
-        pointsBalance: memberProfiles.pointsBalance,
-        joinedAt: authUser.createdAt,
-      })
-      .from(memberProfiles)
-      .innerJoin(authUser, eq(memberProfiles.userId, authUser.id))
-      .where(eq(authUser.role, "user"))
-      .orderBy(desc(authUser.createdAt), desc(authUser.id))
-      .limit(ADMIN_MEMBER_LIST_LIMIT),
-    db
-      .select({
-        id: loyaltyTransactions.id,
-        memberId: authUser.id,
-        memberName: authUser.name,
-        memberEmail: authUser.email,
-        adjustmentByName: adjustmentActor.name,
-        type: loyaltyTransactions.type,
-        pointsDelta: loyaltyTransactions.pointsDelta,
-        balanceAfter: loyaltyTransactions.balanceAfter,
-        description: loyaltyTransactions.description,
-        createdAt: loyaltyTransactions.createdAt,
-      })
-      .from(loyaltyTransactions)
-      .innerJoin(authUser, eq(loyaltyTransactions.userId, authUser.id))
-      .leftJoin(adjustmentActor, eq(loyaltyTransactions.createdByUserId, adjustmentActor.id))
-      .orderBy(desc(loyaltyTransactions.createdAt), desc(loyaltyTransactions.id))
-      .limit(ADMIN_LOYALTY_HISTORY_LIMIT),
+    getAdminMemberList(),
+    getAdminLoyaltyHistory(),
     db
       .select({
         id: loyaltySettings.id,
