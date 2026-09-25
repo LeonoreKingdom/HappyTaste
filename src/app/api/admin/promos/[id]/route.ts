@@ -34,7 +34,11 @@ export async function GET(request: Request, { params }: PromoRouteContext) {
   }
 }
 
-export async function PUT(request: Request, { params }: PromoRouteContext) {
+async function updatePromoRoute(
+  request: Request,
+  { params }: PromoRouteContext,
+  merge: boolean,
+) {
   const authorization = await requireAdmin(request);
   if (authorization.response) return authorization.response;
 
@@ -51,7 +55,7 @@ export async function PUT(request: Request, { params }: PromoRouteContext) {
 
   try {
     const { updateAdminPromo } = await import("@/db/services/admin-promos");
-    const result = await updateAdminPromo(id, body);
+    const result = await updateAdminPromo(id, body, { merge });
     if (!result.success) {
       return NextResponse.json(
         { success: false, error: result.error },
@@ -69,8 +73,12 @@ export async function PUT(request: Request, { params }: PromoRouteContext) {
   }
 }
 
+export async function PUT(request: Request, context: PromoRouteContext) {
+  return updatePromoRoute(request, context, false);
+}
+
 export async function PATCH(request: Request, context: PromoRouteContext) {
-  return PUT(request, context);
+  return updatePromoRoute(request, context, true);
 }
 
 export async function DELETE(request: Request) {

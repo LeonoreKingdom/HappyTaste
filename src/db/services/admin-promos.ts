@@ -179,15 +179,38 @@ export async function createAdminPromo(value: unknown): Promise<WriteResult> {
   return { success: true, id };
 }
 
-export async function updateAdminPromo(id: string, value: unknown): Promise<WriteResult> {
+export async function updateAdminPromo(
+  id: string,
+  value: unknown,
+  options: { merge?: boolean } = {},
+): Promise<WriteResult> {
   const [existing] = await db
-    .select({ id: promos.id })
+    .select()
     .from(promos)
     .where(eq(promos.id, id))
     .limit(1);
   if (!existing) return { success: false, status: 404, error: "Promo tidak ditemukan." };
 
-  const validation = validatePromoInput(value);
+  let input = value;
+  if (options.merge) {
+    if (!isRecord(value)) {
+      return { success: false, status: 400, error: "Data promo tidak valid." };
+    }
+
+    input = {
+      title: existing.title,
+      description: existing.description,
+      type: existing.type,
+      value: existing.value,
+      terms: existing.terms,
+      startDate: existing.startDate.toISOString(),
+      endDate: existing.endDate.toISOString(),
+      isActive: existing.isActive,
+      ...value,
+    };
+  }
+
+  const validation = validatePromoInput(input);
   if (!validation.success) return { success: false, status: 400, error: validation.error };
 
   await db.update(promos).set(validation.data).where(eq(promos.id, id));
@@ -206,15 +229,36 @@ export async function createAdminBanner(value: unknown): Promise<WriteResult> {
   return { success: true, id };
 }
 
-export async function updateAdminBanner(id: string, value: unknown): Promise<WriteResult> {
+export async function updateAdminBanner(
+  id: string,
+  value: unknown,
+  options: { merge?: boolean } = {},
+): Promise<WriteResult> {
   const [existing] = await db
-    .select({ id: banners.id })
+    .select()
     .from(banners)
     .where(eq(banners.id, id))
     .limit(1);
   if (!existing) return { success: false, status: 404, error: "Banner tidak ditemukan." };
 
-  const validation = validateBannerInput(value);
+  let input = value;
+  if (options.merge) {
+    if (!isRecord(value)) {
+      return { success: false, status: 400, error: "Data banner tidak valid." };
+    }
+
+    input = {
+      title: existing.title,
+      imageUrl: existing.imageUrl,
+      link: existing.link,
+      sortOrder: existing.sortOrder,
+      isActive: existing.isActive,
+      promoId: existing.promoId,
+      ...value,
+    };
+  }
+
+  const validation = validateBannerInput(input);
   if (!validation.success) return { success: false, status: 400, error: validation.error };
   if (validation.data.promoId && !(await promoExists(validation.data.promoId))) {
     return { success: false, status: 422, error: "Promo terkait tidak ditemukan." };

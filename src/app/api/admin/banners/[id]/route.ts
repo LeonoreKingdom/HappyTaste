@@ -34,7 +34,11 @@ export async function GET(request: Request, { params }: BannerRouteContext) {
   }
 }
 
-export async function PUT(request: Request, { params }: BannerRouteContext) {
+async function updateBannerRoute(
+  request: Request,
+  { params }: BannerRouteContext,
+  merge: boolean,
+) {
   const authorization = await requireAdmin(request);
   if (authorization.response) return authorization.response;
 
@@ -51,7 +55,7 @@ export async function PUT(request: Request, { params }: BannerRouteContext) {
 
   try {
     const { updateAdminBanner } = await import("@/db/services/admin-promos");
-    const result = await updateAdminBanner(id, body);
+    const result = await updateAdminBanner(id, body, { merge });
     if (!result.success) {
       return NextResponse.json(
         { success: false, error: result.error },
@@ -69,8 +73,12 @@ export async function PUT(request: Request, { params }: BannerRouteContext) {
   }
 }
 
+export async function PUT(request: Request, context: BannerRouteContext) {
+  return updateBannerRoute(request, context, false);
+}
+
 export async function PATCH(request: Request, context: BannerRouteContext) {
-  return PUT(request, context);
+  return updateBannerRoute(request, context, true);
 }
 
 export async function DELETE(request: Request) {
