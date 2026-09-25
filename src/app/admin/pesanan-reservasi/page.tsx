@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import { CalendarDays, ShoppingBag } from "lucide-react";
 
+import { AdminStatusControl } from "@/components/admin/admin-status-control";
 import { listAdminOrders } from "@/db/queries/admin-orders";
 import { listManagementReservations } from "@/db/queries/reservations";
+import {
+  getAdminOrderStatusTransitions,
+  getAdminReservationStatusTransitions,
+} from "@/db/services/admin-status";
 import { requireAdminPage } from "@/lib/auth-session";
 
 export const metadata: Metadata = {
@@ -154,6 +159,15 @@ export default async function AdminOrdersAndReservationsPage() {
                     </td>
                     <td className="px-4 py-4 align-top">
                       <StatusBadge status={order.status} label={orderStatusLabels[order.status]} />
+                      <AdminStatusControl
+                        resource="orders"
+                        recordId={order.id}
+                        currentStatus={order.status}
+                        options={getAdminOrderStatusTransitions(order.status).map((status) => ({
+                          value: status,
+                          label: orderStatusLabels[status],
+                        }))}
+                      />
                     </td>
                     <td className="whitespace-nowrap px-5 py-4 text-right align-top font-semibold text-stone-900 sm:px-6">
                       {currencyFormatter.format(order.total)}
@@ -220,6 +234,15 @@ export default async function AdminOrdersAndReservationsPage() {
                     </td>
                     <td className="px-5 py-4 align-top sm:px-6">
                       <StatusBadge status={reservation.status} label={reservationStatusLabels[reservation.status]} />
+                      <AdminStatusControl
+                        resource="reservations"
+                        recordId={reservation.id}
+                        currentStatus={reservation.status}
+                        options={getAdminReservationStatusTransitions(reservation.status).map((status) => ({
+                          value: status,
+                          label: reservationStatusLabels[status],
+                        }))}
+                      />
                     </td>
                   </tr>
                 ))}
