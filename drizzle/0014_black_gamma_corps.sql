@@ -1,0 +1,1 @@
+ALTER TABLE `menus` ADD `is_available` integer DEFAULT true NOT NULL;
