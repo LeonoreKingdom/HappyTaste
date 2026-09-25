@@ -44,13 +44,12 @@ export async function updateAdminOrderStatus(
   }
 
   const status = requestedStatus as AdminOrderStatus;
-  return db.transaction((tx) => {
-    const [existing] = tx
+  return db.transaction(async (tx) => {
+    const [existing] = await tx
       .select({ status: orders.status })
       .from(orders)
       .where(eq(orders.id, id))
-      .limit(1)
-      .all();
+      .limit(1);
 
     if (!existing) {
       return { success: false, status: 404, error: "Pesanan tidak ditemukan." } as const;
@@ -66,12 +65,11 @@ export async function updateAdminOrderStatus(
         } as const;
       }
 
-      const [updated] = tx
+      const [updated] = await tx
         .update(orders)
         .set({ status })
         .where(and(eq(orders.id, id), eq(orders.status, existing.status)))
-        .returning({ id: orders.id })
-        .all();
+        .returning({ id: orders.id });
 
       if (!updated) {
         return {
@@ -85,7 +83,7 @@ export async function updateAdminOrderStatus(
 
     // Keep the completed-order status and the idempotent points ledger in one transaction.
     const loyalty = status === "completed"
-      ? awardPointsForCompletedOrderInTransaction(tx, id)
+      ? await awardPointsForCompletedOrderInTransaction(tx, id)
       : null;
 
     return { success: true, id, status, changed, loyalty } as const;

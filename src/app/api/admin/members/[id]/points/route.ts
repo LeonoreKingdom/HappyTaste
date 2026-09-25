@@ -26,7 +26,7 @@ export async function POST(request: Request, { params }: MemberPointsRouteContex
   }
 
   try {
-    const result = adjustAdminMemberPoints(authorization.session.user.id, id, body);
+    const result = await adjustAdminMemberPoints(authorization.session.user.id, id, body);
     if (!result.success) {
       return NextResponse.json(
         { success: false, error: result.error },

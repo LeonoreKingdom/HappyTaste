@@ -48,7 +48,7 @@ export async function PATCH(request: Request) {
   }
 
   try {
-    const result = updateAdminLoyaltyEarningRule(authorization.session.user.id, body);
+    const result = await updateAdminLoyaltyEarningRule(authorization.session.user.id, body);
     if (!result.success) {
       return NextResponse.json(
         { success: false, error: result.error },

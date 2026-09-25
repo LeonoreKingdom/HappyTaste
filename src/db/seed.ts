@@ -3,7 +3,7 @@ import { mockBanners, mockPromos } from "@/data/mock-promos";
 import { mockTables } from "@/data/mock-tables";
 import { mockLocationContactInfo } from "@/data/mock-location-contact";
 import { mockReservationOutlets } from "@/data/mock-reservations";
-import { db } from "./index";
+import { client, db } from "./index";
 import { banners, menuCategories, menus, outlets, promos, restaurantTables } from "./schema";
 
 const categoryIds = {
@@ -88,15 +88,26 @@ const outletRows = mockReservationOutlets.map((outlet) => ({
   isActive: true,
 }));
 
-db.transaction((tx) => {
-  tx.insert(menuCategories).values(categoryRows).onConflictDoNothing().run();
-  tx.insert(menus).values(menuRows).onConflictDoNothing().run();
-  tx.insert(promos).values(promoRows).onConflictDoNothing().run();
-  tx.insert(banners).values(bannerRows).onConflictDoNothing().run();
-  tx.insert(restaurantTables).values(tableRows).onConflictDoNothing().run();
-  tx.insert(outlets).values(outletRows).onConflictDoNothing().run();
-});
+async function seed() {
+  try {
+    await db.transaction(async (tx) => {
+      await tx.insert(menuCategories).values(categoryRows).onConflictDoNothing();
+      await tx.insert(menus).values(menuRows).onConflictDoNothing();
+      await tx.insert(promos).values(promoRows).onConflictDoNothing();
+      await tx.insert(banners).values(bannerRows).onConflictDoNothing();
+      await tx.insert(restaurantTables).values(tableRows).onConflictDoNothing();
+      await tx.insert(outlets).values(outletRows).onConflictDoNothing();
+    });
 
-console.log(
-  `Seed siap: ${categoryRows.length} kategori, ${menuRows.length} menu, ${promoRows.length} promo, ${bannerRows.length} banner, ${tableRows.length} meja, ${outletRows.length} outlet.`,
-);
+    console.log(
+      `Seed siap: ${categoryRows.length} kategori, ${menuRows.length} menu, ${promoRows.length} promo, ${bannerRows.length} banner, ${tableRows.length} meja, ${outletRows.length} outlet.`,
+    );
+  } catch (error) {
+    console.error("Seed gagal.", error);
+    process.exitCode = 1;
+  } finally {
+    await client.close();
+  }
+}
+
+void seed();

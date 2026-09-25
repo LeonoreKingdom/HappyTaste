@@ -187,7 +187,7 @@ export async function createMemberReservation(input: CreateMemberReservationInpu
   }
 
   const reservationId = randomUUID();
-  db.insert(reservations)
+  await db.insert(reservations)
     .values({
       id: reservationId,
       userId: input.userId,
@@ -198,8 +198,7 @@ export async function createMemberReservation(input: CreateMemberReservationInpu
       guestCount: input.guestCount,
       status: "pending",
       notes: input.notes ?? null,
-    })
-    .run();
+    });
 
   return {
     id: reservationId,
@@ -248,7 +247,7 @@ export async function updateMemberReservation(input: {
   }
 
   const updatedAt = new Date();
-  db.update(reservations)
+  await db.update(reservations)
     .set({
       tableTypeId: input.tableTypeId,
       arrivalDate: input.arrivalDate,
@@ -261,8 +260,7 @@ export async function updateMemberReservation(input: {
         eq(reservations.id, input.reservationId),
         eq(reservations.userId, input.userId),
       ),
-    )
-    .run();
+    );
 
   return {
     ...existing,
@@ -284,12 +282,11 @@ export async function cancelMemberReservation(reservationId: string, userId: str
   }
 
   const updatedAt = new Date();
-  db.update(reservations)
+  await db.update(reservations)
     .set({ status: "cancelled", updatedAt })
     .where(
       and(eq(reservations.id, reservationId), eq(reservations.userId, userId)),
-    )
-    .run();
+    );
 
   return { ...existing, status: "cancelled" as const, updatedAt };
 }
