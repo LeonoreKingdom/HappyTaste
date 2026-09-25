@@ -7,14 +7,18 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-orange-100 bg-white/95 backdrop-blur shadow-sm">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl text-orange-600">
+        <Link
+          href="/"
+          aria-label="HappyTaste — beranda"
+          className="flex shrink-0 items-center gap-2 font-bold text-xl text-orange-600"
+        >
           <div className="w-9 h-9 rounded-xl bg-orange-600 flex items-center justify-center text-white shadow-md">
             <Utensils className="w-5 h-5" />
           </div>
-          <span>HappyTaste</span>
+          <span className="hidden sm:inline">HappyTaste</span>
         </Link>
 
-        <div className="flex items-center gap-2 sm:gap-6">
+        <div className="flex min-w-0 items-center gap-1 sm:gap-6">
           <nav
             aria-label="Navigasi utama"
             className="flex items-center gap-1 text-sm font-medium text-gray-700 sm:gap-6"
