@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 
 const comingSoonItems = [
-  { label: "Kelola menu", icon: Utensils },
   { label: "Promo & banner", icon: Tags },
   { label: "Pesanan", icon: ShoppingBag },
   { label: "Reservasi", icon: CalendarDays },
@@ -22,6 +21,7 @@ const comingSoonItems = [
 export function AdminPanelNavigation() {
   const activeSegment = useSelectedLayoutSegment();
   const dashboardIsActive = activeSegment === null;
+  const menuIsActive = activeSegment === "menu";
 
   return (
     <nav aria-label="Menu panel pengelola" className="mt-4">
@@ -41,6 +41,20 @@ export function AdminPanelNavigation() {
           >
             <LayoutDashboard aria-hidden="true" className="h-4 w-4 shrink-0" />
             Dashboard
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/admin/menu"
+            aria-current={menuIsActive ? "page" : undefined}
+            className={`flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200 ${
+              menuIsActive
+                ? "bg-orange-50 text-orange-800 ring-1 ring-inset ring-orange-100"
+                : "text-stone-600 hover:bg-stone-50 hover:text-orange-800"
+            }`}
+          >
+            <Utensils aria-hidden="true" className="h-4 w-4 shrink-0" />
+            Kelola menu
           </Link>
         </li>
         {comingSoonItems.map((item) => {
