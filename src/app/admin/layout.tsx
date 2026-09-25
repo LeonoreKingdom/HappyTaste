@@ -1,25 +1,15 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import {
   ArrowUpRight,
   ChartNoAxesCombined,
 } from "lucide-react";
 
 import { AdminPanelNavigation } from "@/components/admin/admin-panel-navigation";
-import { getCurrentSession } from "@/lib/auth-session";
+import { requireAdminPage } from "@/lib/auth-session";
 
 export default async function AdminPanelLayout({ children }: { children: ReactNode }) {
-  const session = await getCurrentSession(await headers());
-
-  if (!session?.user) {
-    redirect(`/akun/masuk?next=${encodeURIComponent("/admin")}`);
-  }
-
-  if (session.user.role !== "admin") {
-    redirect("/");
-  }
+  const session = await requireAdminPage();
 
   const managerName = session.user.name.trim() || session.user.email;
 
@@ -65,7 +55,7 @@ export default async function AdminPanelLayout({ children }: { children: ReactNo
             </div>
             <span className="inline-flex w-fit items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-900">
               <span aria-hidden="true" className="h-2 w-2 rounded-full bg-amber-500" />
-              Pratinjau data demo
+              Akses administrator aktif
             </span>
           </header>
 
