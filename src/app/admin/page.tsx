@@ -9,9 +9,12 @@ import {
 
 import {
   getAdminDailyDashboard,
+  getAdminSalesTrend,
+  type AdminSalesTrendRange,
   type AdminDashboardOrderStatus,
 } from "@/db/queries/admin-dashboard";
 import { requireAdminPage } from "@/lib/auth-session";
+import { SalesTrendChart } from "@/components/admin/sales-trend-chart";
 
 export const metadata: Metadata = {
   title: "Dashboard Pengelola - HappyTaste Resto",
@@ -48,14 +51,32 @@ const statusClasses: Record<AdminDashboardOrderStatus, string> = {
   cancelled: "bg-stone-100 text-stone-700 ring-stone-200",
 };
 
-export default async function AdminDashboardPage() {
+type AdminDashboardSearchParams = {
+  range?: string | string[];
+};
+
+function getSalesTrendRange(value: AdminDashboardSearchParams["range"]): AdminSalesTrendRange {
+  const candidate = Array.isArray(value) ? value[0] : value;
+
+  return candidate === "30d" || candidate === "90d" ? candidate : "7d";
+}
+
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<AdminDashboardSearchParams>;
+}) {
   await requireAdminPage();
-  const dashboard = await getAdminDailyDashboard();
+  const range = getSalesTrendRange((await searchParams).range);
+  const [dashboard, salesTrend] = await Promise.all([
+    getAdminDailyDashboard(),
+    getAdminSalesTrend(range),
+  ]);
   const metrics = [
     {
-      label: "Pendapatan terealisasi",
-      value: currencyFormatter.format(dashboard.orders.realizedRevenue),
-      detail: `${numberFormatter.format(dashboard.orders.completed)} pesanan selesai`,
+      label: "Nilai pesanan selesai",
+      value: currencyFormatter.format(dashboard.orders.completedOrderValue),
+      detail: `${numberFormatter.format(dashboard.orders.completed)} selesai · dibuat hari ini`,
       icon: CircleDollarSign,
       tone: "orange",
     },
@@ -117,10 +138,12 @@ export default async function AdminDashboardPage() {
       >
         <Info aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-sky-800" />
         <p>
-          Ringkasan ini memakai data yang tersimpan. Pendapatan hanya menghitung pesanan berstatus
-          selesai; pesanan tertunda dan dibatalkan tidak ikut dijumlahkan.
+          Ringkasan dikelompokkan berdasarkan tanggal pesanan dibuat. Nilai hanya menghitung pesanan
+          berstatus selesai; pesanan tertunda dan dibatalkan tidak ikut dijumlahkan.
         </p>
       </aside>
+
+      <SalesTrendChart range={range} data={salesTrend} />
 
       <section aria-label="Metrik operasional hari ini" className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
         {metrics.map((metric) => {
