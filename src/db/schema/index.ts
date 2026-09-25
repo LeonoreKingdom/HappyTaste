@@ -8,3 +8,4 @@ export * from "./reservations";
 export * from "./outlets";
 export * from "./loyalty-transactions";
 export * from "./loyalty-rewards";
+export * from "./loyalty-settings";

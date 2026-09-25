@@ -6,6 +6,7 @@ import { and, asc, desc, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   loyaltyRewards,
+  loyaltySettings,
   loyaltyTransactions,
   memberProfiles,
   orders,
@@ -320,7 +321,20 @@ export function awardPointsForCompletedOrderInTransaction(
     };
   }
 
-  const pointsAwarded = calculateBaseLoyaltyPoints(order.total);
+  const [earningSettings] = tx
+    .select({ idrPerPoint: loyaltySettings.idrPerPoint })
+    .from(loyaltySettings)
+    .where(eq(loyaltySettings.id, "default"))
+    .limit(1)
+    .all();
+  if (!earningSettings) {
+    throw new Error("Canonical loyalty earning settings are missing.");
+  }
+
+  const pointsAwarded = calculateBaseLoyaltyPoints(
+    order.total,
+    earningSettings.idrPerPoint,
+  );
   if (pointsAwarded === 0) {
     return { status: "skipped", orderId: order.id, reason: "zero_points" };
   }
