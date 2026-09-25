@@ -26,7 +26,7 @@ export function MemberLoginForm() {
     setIsSubmitting(true);
 
     try {
-      const { error } = await signIn.email({ email, password });
+      const { data, error } = await signIn.email({ email, password });
 
       if (error) {
         setFormError("Email atau kata sandi tidak cocok. Periksa kembali lalu coba lagi.");
@@ -51,7 +51,12 @@ export function MemberLoginForm() {
         }
       }
 
-      setStatus("Login berhasil. Sesi member sudah aktif.");
+      if (data?.user.role === "admin") {
+        router.replace("/admin");
+        return;
+      }
+
+      setStatus("Login berhasil. Sesi akun HappyTaste sudah aktif.");
     } catch {
       setFormError("Layanan autentikasi belum dapat dijangkau. Coba lagi sebentar.");
     } finally {
@@ -69,12 +74,13 @@ export function MemberLoginForm() {
       </Link>
 
       <header className="max-w-3xl">
-        <p className="text-sm font-semibold tracking-wide text-orange-700">AKUN MEMBER</p>
+        <p className="text-sm font-semibold tracking-wide text-orange-700">AKUN HAPPYTASTE</p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-stone-950 sm:text-4xl">
-          Masuk ke akunmu
+          Masuk ke HappyTaste
         </h1>
         <p className="mt-3 leading-7 text-stone-600">
-          Gunakan email dan kata sandi akun member HappyTaste.
+          Gunakan email dan kata sandi akun HappyTaste. Panel admin hanya tersedia untuk akun
+          dengan peran admin.
         </p>
       </header>
 
@@ -88,7 +94,7 @@ export function MemberLoginForm() {
               <LockKeyhole aria-hidden="true" className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-orange-700">LOGIN MEMBER</p>
+              <p className="text-sm font-semibold text-orange-700">LOGIN AKUN</p>
               <h2 id="login-form-title" className="text-xl font-bold text-stone-900">
                 Informasi akun
               </h2>

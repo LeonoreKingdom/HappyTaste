@@ -23,6 +23,7 @@ export async function GET(
         imageUrl: menus.imageUrl,
         ingredients: menus.ingredients,
         portion: menus.portion,
+        isAvailable: menus.isAvailable,
       })
       .from(menus)
       .innerJoin(menuCategories, eq(menus.categoryId, menuCategories.id))
@@ -48,6 +49,7 @@ export async function GET(
         imageUrl: menu.imageUrl,
         ingredients: menu.ingredients,
         portion: menu.portion,
+        isAvailable: menu.isAvailable,
       },
     });
   } catch (error) {

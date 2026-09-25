@@ -6,6 +6,7 @@ import { and, asc, desc, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   loyaltyRewards,
+  loyaltySettings,
   loyaltyTransactions,
   memberProfiles,
   orders,
@@ -216,7 +217,10 @@ export function getMemberLoyaltyOverview(userId: string) {
   });
 }
 
-export function awardPointsForCompletedOrder(
+type LoyaltyTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+export function awardPointsForCompletedOrderInTransaction(
+  tx: LoyaltyTransaction,
   orderId: string,
 ): AwardPointsForCompletedOrderResult {
   const normalizedOrderId = orderId.trim();
@@ -224,142 +228,159 @@ export function awardPointsForCompletedOrder(
     return { status: "skipped", orderId, reason: "order_not_found" };
   }
 
-  return db.transaction((tx) => {
-    const [order] = tx
-      .select({
-        id: orders.id,
-        userId: orders.userId,
-        status: orders.status,
-        total: orders.total,
-      })
-      .from(orders)
-      .where(eq(orders.id, normalizedOrderId))
-      .limit(1)
-      .all();
+  const [order] = tx
+    .select({
+      id: orders.id,
+      userId: orders.userId,
+      status: orders.status,
+      total: orders.total,
+    })
+    .from(orders)
+    .where(eq(orders.id, normalizedOrderId))
+    .limit(1)
+    .all();
 
-    if (!order) {
-      return {
-        status: "skipped",
-        orderId: normalizedOrderId,
-        reason: "order_not_found",
-      };
-    }
-
-    if (order.status !== "completed") {
-      return {
-        status: "skipped",
-        orderId: order.id,
-        reason: "order_not_completed",
-      };
-    }
-
-    if (!order.userId) {
-      return { status: "skipped", orderId: order.id, reason: "guest_order" };
-    }
-
-    const [member] = tx
-      .select({ id: authUser.id, role: authUser.role })
-      .from(authUser)
-      .where(and(eq(authUser.id, order.userId), eq(authUser.role, "user")))
-      .limit(1)
-      .all();
-
-    if (!member) {
-      return { status: "skipped", orderId: order.id, reason: "non_member_order" };
-    }
-
-    const [profile] = tx
-      .select({ userId: memberProfiles.userId })
-      .from(memberProfiles)
-      .where(eq(memberProfiles.userId, order.userId))
-      .limit(1)
-      .all();
-
-    if (!profile) {
-      return {
-        status: "skipped",
-        orderId: order.id,
-        reason: "member_profile_missing",
-      };
-    }
-
-    const [existingAward] = tx
-      .select({
-        pointsDelta: loyaltyTransactions.pointsDelta,
-        balanceAfter: loyaltyTransactions.balanceAfter,
-      })
-      .from(loyaltyTransactions)
-      .where(
-        and(
-          eq(loyaltyTransactions.userId, order.userId),
-          eq(loyaltyTransactions.referenceType, "order"),
-          eq(loyaltyTransactions.referenceId, order.id),
-          eq(loyaltyTransactions.type, "earn"),
-        ),
-      )
-      .limit(1)
-      .all();
-
-    if (existingAward) {
-      return {
-        status: "already_awarded",
-        orderId: order.id,
-        userId: order.userId,
-        pointsAwarded: existingAward.pointsDelta,
-        balanceAfter: existingAward.balanceAfter,
-      };
-    }
-
-    if (!Number.isSafeInteger(order.total) || order.total <= 0) {
-      return {
-        status: "skipped",
-        orderId: order.id,
-        reason: "non_positive_total",
-      };
-    }
-
-    const pointsAwarded = calculateBaseLoyaltyPoints(order.total);
-    if (pointsAwarded === 0) {
-      return { status: "skipped", orderId: order.id, reason: "zero_points" };
-    }
-
-    const [updatedProfile] = tx
-      .update(memberProfiles)
-      .set({
-        pointsBalance: sql`${memberProfiles.pointsBalance} + ${pointsAwarded}`,
-        updatedAt: new Date(),
-      })
-      .where(eq(memberProfiles.userId, order.userId))
-      .returning({ pointsBalance: memberProfiles.pointsBalance })
-      .all();
-
-    if (!updatedProfile) {
-      return {
-        status: "skipped",
-        orderId: order.id,
-        reason: "member_profile_missing",
-      };
-    }
-
-    tx.insert(loyaltyTransactions)
-      .values({
-        id: randomUUID(),
-        userId: order.userId,
-        type: "earn",
-        pointsDelta: pointsAwarded,
-        balanceAfter: updatedProfile.pointsBalance,
-        description: "Poin dari pesanan selesai",
-        referenceType: "order",
-        referenceId: order.id,
-      })
-      .run();
-
+  if (!order) {
     return {
-      status: "awarded",
+      status: "skipped",
+      orderId: normalizedOrderId,
+      reason: "order_not_found",
+    };
+  }
+
+  if (order.status !== "completed") {
+    return {
+      status: "skipped",
+      orderId: order.id,
+      reason: "order_not_completed",
+    };
+  }
+
+  if (!order.userId) {
+    return { status: "skipped", orderId: order.id, reason: "guest_order" };
+  }
+
+  const [member] = tx
+    .select({ id: authUser.id, role: authUser.role })
+    .from(authUser)
+    .where(and(eq(authUser.id, order.userId), eq(authUser.role, "user")))
+    .limit(1)
+    .all();
+
+  if (!member) {
+    return { status: "skipped", orderId: order.id, reason: "non_member_order" };
+  }
+
+  const [profile] = tx
+    .select({ userId: memberProfiles.userId })
+    .from(memberProfiles)
+    .where(eq(memberProfiles.userId, order.userId))
+    .limit(1)
+    .all();
+
+  if (!profile) {
+    return {
+      status: "skipped",
+      orderId: order.id,
+      reason: "member_profile_missing",
+    };
+  }
+
+  const [existingAward] = tx
+    .select({
+      pointsDelta: loyaltyTransactions.pointsDelta,
+      balanceAfter: loyaltyTransactions.balanceAfter,
+    })
+    .from(loyaltyTransactions)
+    .where(
+      and(
+        eq(loyaltyTransactions.userId, order.userId),
+        eq(loyaltyTransactions.referenceType, "order"),
+        eq(loyaltyTransactions.referenceId, order.id),
+        eq(loyaltyTransactions.type, "earn"),
+      ),
+    )
+    .limit(1)
+    .all();
+
+  if (existingAward) {
+    return {
+      status: "already_awarded",
       orderId: order.id,
       userId: order.userId,
-      pointsAwarded,
-      balanceAfter: updatedProfile.pointsBalance,
+      pointsAwarded: existingAward.pointsDelta,
+      balanceAfter: existingAward.balanceAfter,
     };
-  });
+  }
+
+  if (!Number.isSafeInteger(order.total) || order.total <= 0) {
+    return {
+      status: "skipped",
+      orderId: order.id,
+      reason: "non_positive_total",
+    };
+  }
+
+  const [earningSettings] = tx
+    .select({ idrPerPoint: loyaltySettings.idrPerPoint })
+    .from(loyaltySettings)
+    .where(eq(loyaltySettings.id, "default"))
+    .limit(1)
+    .all();
+  if (!earningSettings) {
+    throw new Error("Canonical loyalty earning settings are missing.");
+  }
+
+  const pointsAwarded = calculateBaseLoyaltyPoints(
+    order.total,
+    earningSettings.idrPerPoint,
+  );
+  if (pointsAwarded === 0) {
+    return { status: "skipped", orderId: order.id, reason: "zero_points" };
+  }
+
+  const [updatedProfile] = tx
+    .update(memberProfiles)
+    .set({
+      pointsBalance: sql`${memberProfiles.pointsBalance} + ${pointsAwarded}`,
+      updatedAt: new Date(),
+    })
+    .where(eq(memberProfiles.userId, order.userId))
+    .returning({ pointsBalance: memberProfiles.pointsBalance })
+    .all();
+
+  if (!updatedProfile) {
+    return {
+      status: "skipped",
+      orderId: order.id,
+      reason: "member_profile_missing",
+    };
+  }
+
+  tx.insert(loyaltyTransactions)
+    .values({
+      id: randomUUID(),
+      userId: order.userId,
+      type: "earn",
+      pointsDelta: pointsAwarded,
+      balanceAfter: updatedProfile.pointsBalance,
+      description: "Poin dari pesanan selesai",
+      referenceType: "order",
+      referenceId: order.id,
+    })
+    .run();
+
+  return {
+    status: "awarded",
+    orderId: order.id,
+    userId: order.userId,
+    pointsAwarded,
+    balanceAfter: updatedProfile.pointsBalance,
+  };
+}
+
+export function awardPointsForCompletedOrder(
+  orderId: string,
+): AwardPointsForCompletedOrderResult {
+  return db.transaction((tx) => awardPointsForCompletedOrderInTransaction(tx, orderId));
 }

@@ -26,6 +26,7 @@ export const menus = sqliteTable(
     name: text("name").notNull(),
     description: text("description").notNull(),
     price: integer("price").notNull(),
+    isAvailable: integer("is_available", { mode: "boolean" }).notNull().default(true),
     categoryId: text("category_id")
       .notNull()
       .references(() => menuCategories.id, { onDelete: "restrict" }),

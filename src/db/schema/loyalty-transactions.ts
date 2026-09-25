@@ -9,6 +9,7 @@ import {
 } from "drizzle-orm/sqlite-core";
 
 import { memberProfiles } from "./member-profiles";
+import { user as authUser } from "./auth";
 
 export const loyaltyTransactionTypes = [
   "earn",
@@ -24,6 +25,9 @@ export const loyaltyTransactions = sqliteTable(
     userId: text("user_id")
       .notNull()
       .references(() => memberProfiles.userId, { onDelete: "cascade" }),
+    createdByUserId: text("created_by_user_id").references(() => authUser.id, {
+      onDelete: "set null",
+    }),
     type: text("type", { enum: loyaltyTransactionTypes }).notNull(),
     pointsDelta: integer("points_delta").notNull(),
     balanceAfter: integer("balance_after").notNull(),
@@ -71,6 +75,10 @@ export const loyaltyTransactionsRelations = relations(
     memberProfile: one(memberProfiles, {
       fields: [loyaltyTransactions.userId],
       references: [memberProfiles.userId],
+    }),
+    createdBy: one(authUser, {
+      fields: [loyaltyTransactions.createdByUserId],
+      references: [authUser.id],
     }),
   }),
 );
