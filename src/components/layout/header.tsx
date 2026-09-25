@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { Utensils, Tag } from "lucide-react";
+import { Home, Utensils, Tag } from "lucide-react";
+
+import { AccountSessionControl } from "@/components/layout/account-session-control";
 
 export function Header() {
   return (
@@ -12,28 +14,41 @@ export function Header() {
           <span>HappyTaste</span>
         </Link>
 
-        <nav
-          aria-label="Navigasi utama"
-          className="flex items-center gap-3 text-sm font-medium text-gray-700 sm:gap-6"
-        >
-          <Link href="/" className="hover:text-orange-600 transition-colors">
-            Beranda
-          </Link>
-          <Link
-            href="/menu"
-            className="flex items-center gap-1.5 transition-colors hover:text-orange-600"
+        <div className="flex items-center gap-2 sm:gap-6">
+          <nav
+            aria-label="Navigasi utama"
+            className="flex items-center gap-1 text-sm font-medium text-gray-700 sm:gap-6"
           >
-            <Utensils className="w-4 h-4" />
-            Menu
-          </Link>
-          <Link
-            href="/promo"
-            className="flex items-center gap-1.5 transition-colors hover:text-orange-600"
-          >
-            <Tag className="w-4 h-4" />
-            Promo
-          </Link>
-        </nav>
+            <Link
+              href="/"
+              aria-label="Beranda"
+              title="Beranda"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg px-2 transition-colors hover:bg-orange-50 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+            >
+              <Home aria-hidden="true" className="h-4 w-4 sm:hidden" />
+              <span className="sr-only sm:not-sr-only">Beranda</span>
+            </Link>
+            <Link
+              href="/menu"
+              aria-label="Menu"
+              title="Menu"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg px-2 transition-colors hover:bg-orange-50 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+            >
+              <Utensils aria-hidden="true" className="h-4 w-4 sm:hidden" />
+              <span className="sr-only sm:not-sr-only">Menu</span>
+            </Link>
+            <Link
+              href="/promo"
+              aria-label="Promo"
+              title="Promo"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg px-2 transition-colors hover:bg-orange-50 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+            >
+              <Tag aria-hidden="true" className="h-4 w-4 sm:hidden" />
+              <span className="sr-only sm:not-sr-only">Promo</span>
+            </Link>
+          </nav>
+          <AccountSessionControl />
+        </div>
       </div>
     </header>
   );

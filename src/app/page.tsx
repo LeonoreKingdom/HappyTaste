@@ -1,6 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Award, Sparkles, Tag, Utensils } from "lucide-react";
+import {
+  ArrowRight,
+  Award,
+  CalendarDays,
+  MapPin,
+  ShoppingBag,
+  Sparkles,
+  Tag,
+  Utensils,
+  UserRoundPlus,
+} from "lucide-react";
 
 import { MenuBrowser } from "@/components/menu/menu-browser";
 import { PromoCarousel } from "@/components/promo/promo-carousel";
@@ -25,7 +35,7 @@ export default function HomePage() {
         <PromoCarousel banners={activeBanners} promos={activePromos} />
       </section>
 
-      <section aria-label="Akses cepat" className="grid gap-4 sm:grid-cols-2">
+      <section aria-label="Akses cepat" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Link
           href="/menu"
           className="group flex items-center gap-4 rounded-xl border border-orange-100 bg-white p-5 shadow-sm transition-all hover:border-orange-300 hover:shadow-md"
@@ -53,6 +63,51 @@ export default function HomePage() {
               Lihat Semua Promo
             </h2>
             <p className="text-xs text-gray-500">Penawaran spesial HappyTaste</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/order"
+          className="group flex items-center gap-4 rounded-xl border border-orange-100 bg-white p-5 shadow-sm transition-all hover:border-orange-300 hover:shadow-md"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-stone-100 text-stone-700 transition-colors group-hover:bg-stone-800 group-hover:text-white">
+            <ShoppingBag className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-gray-900 transition-colors group-hover:text-orange-600">
+              Pesan Makanan
+            </h2>
+            <p className="text-xs text-gray-500">Susun pesanan favoritmu</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/reservation"
+          className="group flex items-center gap-4 rounded-xl border border-orange-100 bg-white p-5 shadow-sm transition-all hover:border-orange-300 hover:shadow-md"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 transition-colors group-hover:bg-emerald-700 group-hover:text-white">
+            <CalendarDays className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-gray-900 transition-colors group-hover:text-emerald-700">
+              Reservasi Meja
+            </h2>
+            <p className="text-xs text-gray-500">Atur jadwal kunjungan member</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/lokasi-kontak"
+          className="group flex items-center gap-4 rounded-xl border border-orange-100 bg-white p-5 shadow-sm transition-all hover:border-orange-300 hover:shadow-md"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-100 text-sky-700 transition-colors group-hover:bg-sky-700 group-hover:text-white">
+            <MapPin className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-gray-900 transition-colors group-hover:text-sky-700">
+              Lokasi & Kontak
+            </h2>
+            <p className="text-xs text-gray-500">Informasi outlet HappyTaste</p>
           </div>
         </Link>
       </section>
@@ -143,13 +198,29 @@ export default function HomePage() {
             momen makanmu hari ini.
           </p>
         </div>
-        <Link
-          href="/menu"
-          className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-white px-6 py-3 text-sm font-bold text-orange-600 shadow-lg transition-transform hover:bg-orange-50 active:scale-95"
-        >
-          <Utensils className="h-4 w-4" />
-          <span>Lihat Menu</span>
-        </Link>
+        <div className="flex flex-wrap justify-center gap-3 sm:justify-start">
+          <Link
+            href="/akun/daftar"
+            className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-white px-5 py-3 text-sm font-bold text-orange-700 shadow-lg transition-colors hover:bg-orange-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+          >
+            <UserRoundPlus aria-hidden="true" className="h-4 w-4" />
+            <span>Daftar akun demo</span>
+          </Link>
+          <Link
+            href="/menu"
+            className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-white/70 bg-orange-700/20 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-orange-700/35 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+          >
+            <Utensils aria-hidden="true" className="h-4 w-4" />
+            <span>Lihat Menu</span>
+          </Link>
+          <Link
+            href="/loyalty"
+            className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-white/70 bg-orange-700/20 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-orange-700/35 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+          >
+            <Award aria-hidden="true" className="h-4 w-4" />
+            <span>Lihat Loyalty & Poin</span>
+          </Link>
+        </div>
       </section>
     </main>
   );

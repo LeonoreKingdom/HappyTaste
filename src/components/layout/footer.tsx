@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Utensils } from "lucide-react";
 
 export function Footer() {
@@ -11,6 +12,12 @@ export function Footer() {
         <p className="flex items-center gap-1 text-xs">
           Dibuat dengan rasa & kelezatan untuk pecinta kuliner
         </p>
+        <Link
+          href="/lokasi-kontak"
+          className="text-xs font-medium text-orange-700 transition-colors hover:text-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+        >
+          Lokasi & Kontak
+        </Link>
         <p className="text-xs">
           &copy; {new Date().getFullYear()} HappyTaste. Hak cipta dilindungi.
         </p>
